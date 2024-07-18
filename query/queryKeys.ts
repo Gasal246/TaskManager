@@ -1,3 +1,14 @@
 export enum QUERY_KEYS {
-    GET_ALL_ADMIN_DATA = "getAllAdminDataForSuperAdmin"
+    // super admin keys
+    GET_SUPER_ADMIN_BY_ID = "getSuperAdminById",
+    GET_ADMINS = "getSuperAdminById",
+    GET_ADMIN_WITHIN = "getAdminsWithin",
+    GET_ADMIN_ADMINID = "getAdminByAdminId",
+    GET_DEPARTMENT_ID = "getDepartmentById",
+    
+    // admin keys
+    GET_ALL_ADMIN_DATA = "getAllAdminDataForSuperAdmin",
+
+    // user keys
+    GET_USER_BY_ID = "getUserByUserid",
 }

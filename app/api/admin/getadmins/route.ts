@@ -7,18 +7,47 @@ import Admindatas from "@/models/adminDataCollection";
 
 connectDB();
 
-export async function GET(req: NextRequest){
+export async function GET(req: NextRequest) {
     try {
-        const session: any = await getServerSession(authOptions)
-        const superadmin = await Superadmin.findById(session?.user?.id);
-        if(!superadmin){
-            return new NextResponse("Authorization Error: Not A Super Admin", { status: 500 });
+        const searchParams: any = req.nextUrl.searchParams;
+        const filter: AdminDataFilters = searchParams.get('filter');
+        const fromDate = new Date(searchParams.get('from'));
+        const toDate = new Date(searchParams.get('to'));
+        let query = {};
+
+        const today = new Date();
+        const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+        const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+
+        if (filter === 'today') {
+            query = {
+                createdAt: {
+                    $gte: startOfToday,
+                    $lt: new Date(startOfToday.getTime() + 24 * 60 * 60 * 1000)
+                }
+            };
+        } else if (filter === 'month') {
+            query = {
+                createdAt: {
+                    $gte: startOfMonth,
+                    $lt: new Date(today.getFullYear(), today.getMonth() + 1, 1)
+                }
+            };
+        } else if (filter === 'days'){
+            query = {
+                createdAt: {
+                    $gte: fromDate,
+                    $lt: toDate
+                }
+            };
         }
-        const admins = await Admindatas.find({}).populate({
+        
+        const admins = await Admindatas.find(query).populate({
             path: "AdminId",
-            select: { Name: 1, Email: 1, createdAt: 1, updatedAt: 1 }
-        })
-        return Response.json(admins)
+            select: { Name: 1, Email: 1, createdAt: 1, updatedAt: 1, AvatarUrl: 1 }
+        });
+
+        return NextResponse.json(admins);
     } catch (error) {
         console.log(error)
         return new NextResponse(`Internal Server Error: ${error}`, { status: 500 });

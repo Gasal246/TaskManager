@@ -32,7 +32,7 @@ type Department = {
 const AddAdmin = () => {
     const router = useRouter()
     const [departments, setDepartments] = useState<Department[]>([])
-    const { mutateAsync: addNewAdmin, isPending: addingNewAdmin, isSuccess: addedNewAdmin } = useCreateNewAdmin()
+    const { mutateAsync: addNewAdmin, isPending: addingNewAdmin, isSuccess: addedNewAdmin, status: addingStatus } = useCreateNewAdmin()
     const [departmentInput, setDepartmentInput] = useState<Department>({
         DepartmentName: '',
         Max_staff_count: '',
@@ -51,7 +51,7 @@ const AddAdmin = () => {
         if(addedNewAdmin){
             toast.success("New Admin Added Successfully", { description: "You have added a new admin, just now!", onDismiss: () => router.replace('/superadmin/admins')})
         }
-    }, [addedNewAdmin])
+    }, [addedNewAdmin, addingStatus])
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         const response = await addNewAdmin({ name: values.name, email: values.email, departments: departments });

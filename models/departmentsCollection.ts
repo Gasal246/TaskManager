@@ -13,10 +13,10 @@ export interface IDepartments extends Document {
 }
 
 const DepartmentsSchema: Schema = new Schema({
-  AdminId: { type: Schema.Types.ObjectId, required: true },
+  AdminId: { type: Schema.Types.ObjectId, required: true, ref: "Users" },
   DepartmentName: { type: String, required: true },
-  DepartmentHead: { type: Schema.Types.ObjectId },
-  Staffs: [{ type: Schema.Types.ObjectId,  }],
+  DepartmentHead: { type: Schema.Types.ObjectId, ref: "Users" },
+  Staffs: [{ type: Schema.Types.ObjectId, ref: "Users" }],
   Regions: [{ type: Schema.Types.ObjectId,  }],
   AllowProjects: { type: Boolean, required: true },
   AllowTasks: { type: Boolean, required: true },

@@ -10,7 +10,7 @@ export interface IAdmindatas extends Document {
 
 const AdmindatasSchema: Schema = new Schema({
   AdminId: { type: Schema.Types.ObjectId, ref: "Users" },
-  Departments: [{ type: Schema.ObjectId }],
+  Departments: [{ type: Schema.ObjectId, ref: "Departments" }],
   Regions: [{ type: String,  }],
   Areas: [{ type: String,  }],
 }, { timestamps: true });

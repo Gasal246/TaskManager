@@ -18,6 +18,8 @@ export interface IUsers extends Document {
   IsAreaHead: Boolean | null;
   InitialEntry: Boolean | null;
   VerifyCode: String | null;
+  AvatarUrl: String | null;
+  Status: String | null;
 }
 
 const UsersSchema: Schema = new Schema({
@@ -36,7 +38,9 @@ const UsersSchema: Schema = new Schema({
   IsRegionalHead: { type: Boolean },
   IsAreaHead: { type: Boolean },
   InitialEntry: { type: Boolean, default: true },
-  VerifyCode: { type: String }
+  VerifyCode: { type: String },
+  AvatarUrl: { type: String },
+  Status: { type: String, enum: ['active', 'blocked', 'unverified']}
 }, { timestamps: true });
 
 const Users = mongoose.models?.Users || mongoose.model<IUsers>('Users', UsersSchema);

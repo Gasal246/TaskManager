@@ -36,3 +36,12 @@ export async function setupNewPassword(email: string, password: string){
     }
 }
 
+export async function findUserById(id: string){
+    try {
+        const res = await axios.get(`/api/users/get-id/${id}`);
+        return res.data;
+    } catch (error) {
+        console.log(error)
+    }
+}
+

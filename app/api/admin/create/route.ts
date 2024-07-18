@@ -21,7 +21,8 @@ export async function POST(req: NextRequest){
             Email: data?.email,
             Name: data?.name,
             IsAdmin: true,
-            Addedby: session?.user?.id
+            Addedby: session?.user?.id,
+            Status: 'active'
         })
         const adminUser = await newAdminUser.save();
         const newDepartments = data?.departments?.map((dep: NewDepartment) => {

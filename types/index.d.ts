@@ -12,3 +12,10 @@ declare type NewAdminType = {
     email: string;
     departments: NewDepartment[] | []
 }
+
+declare type AdminDataFilters = 'today' | 'month' | 'all' | 'days'
+
+declare type AdminWithinDaysType = {
+    from: string;
+    to: string;
+}
