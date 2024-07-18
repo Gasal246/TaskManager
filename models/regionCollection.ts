@@ -1,7 +1,6 @@
 import mongoose, { Schema, Document, ObjectId } from 'mongoose';
 
 export interface IRegions extends Document {
-  DepartmentId: ObjectId;
   _id: ObjectId;
   RegionHead: ObjectId;
   Administrator: ObjectId;
@@ -10,11 +9,10 @@ export interface IRegions extends Document {
 }
 
 const RegionsSchema: Schema = new Schema({
-  DepartmentId: { type: Schema.Types.ObjectId, required: true, ref: "Departments" },
-  RegionHead: { type: Schema.Types.ObjectId, required: true, ref: "Users" },
-  Administrator: { type: Schema.Types.ObjectId, required: true, unique: true, ref: "Users" },
+  RegionHead: { type: Schema.Types.ObjectId, ref: "Users" },
+  Administrator: { type: Schema.Types.ObjectId, ref: "Users", required: true },
   RegionName: { type: String, required: true },
-  Staffs: [{ type: Schema.Types.ObjectId,  }],
+  Staffs: [{ type: Schema.Types.ObjectId }],
 });
 
 const Regions = mongoose.models?.Regions || mongoose.model<IRegions>('Regions', RegionsSchema);

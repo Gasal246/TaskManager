@@ -80,7 +80,7 @@ const EditDepartmentDialog = ({ trigger, departmentId }: { trigger: React.ReactN
                                     <FormItem>
                                         <FormLabel>Department Name</FormLabel>
                                         <FormControl>
-                                            <Input type='number' placeholder="Department Name" />
+                                            <Input placeholder="Department Name" {...field}  />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>

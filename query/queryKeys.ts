@@ -8,6 +8,10 @@ export enum QUERY_KEYS {
     
     // admin keys
     GET_ALL_ADMIN_DATA = "getAllAdminDataForSuperAdmin",
+    GET_REGIONS_ADMINID = "getAllRegionsByAdminId",
+    GET_REGION_ID = "getRegionById",
+    GET_AREAS_REGIONID = "getAreasByRegionId",
+    GET_AREA_ID = "getAreaById",
 
     // user keys
     GET_USER_BY_ID = "getUserByUserid",

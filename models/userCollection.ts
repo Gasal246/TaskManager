@@ -14,6 +14,8 @@ export interface IUsers extends Document {
   }[];
   Skills: String[] | null;
   Addedby: ObjectId | null;
+  Region: ObjectId | null;
+  Area: ObjectId | null;
   IsRegionalHead: Boolean | null;
   IsAreaHead: Boolean | null;
   InitialEntry: Boolean | null;
@@ -40,7 +42,9 @@ const UsersSchema: Schema = new Schema({
   InitialEntry: { type: Boolean, default: true },
   VerifyCode: { type: String },
   AvatarUrl: { type: String },
-  Status: { type: String, enum: ['active', 'blocked', 'unverified']}
+  Status: { type: String, enum: ['active', 'blocked', 'unverified']},
+  Region: { type: Schema.Types.ObjectId, ref: "Regions" },
+  Area: { type: Schema.Types.ObjectId, ref: "Areas" }
 }, { timestamps: true });
 
 const Users = mongoose.models?.Users || mongoose.model<IUsers>('Users', UsersSchema);
