@@ -179,3 +179,41 @@ export async function updateStaffStatus(staffid: string, status: StaffStatus){
         console.log(error);
     }
 }
+
+// ######### DEPARTMENT ROUTES ########
+
+export async function getAllDepartments(adminid: string){
+    try {
+        const res = await axios.get(`/api/department/get-all/${adminid}`);
+        return res.data;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export async function getDepartmentById(departmentid: string){
+    try {
+        const res = await axios.get(`/api/department/get-id/${departmentid}`);
+        return res.data;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export async function addDepartmentHead(depid: string, staffid: string){
+    try {
+        const res = await axios.post('/api/department/add-head', { depid, staffid });
+        return res.data;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export async function addDepartmentRegion(depid: string, regionid: string){
+    try {
+        const res = await axios.post('/api/department/add-region', { depid, regionid });
+        return res.data;
+    } catch (error) {
+        console.log(error);
+    }
+}

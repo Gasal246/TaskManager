@@ -17,7 +17,12 @@ const DepartmentsSchema: Schema = new Schema({
   DepartmentName: { type: String, required: true },
   DepartmentHead: { type: Schema.Types.ObjectId, ref: "Users" },
   Staffs: [{ type: Schema.Types.ObjectId, ref: "Users" }],
-  Regions: [{ type: Schema.Types.ObjectId,  }],
+  Regions: [
+    {
+      RegionId: { type: Schema.Types.ObjectId, ref: "Regions" },
+      Areas: [{ type: Schema.Types.ObjectId, ref: "Areas" }]
+    }
+  ],
   AllowProjects: { type: Boolean, required: true },
   AllowTasks: { type: Boolean, required: true },
   MaximumStaffs: { type: Number, required: true },

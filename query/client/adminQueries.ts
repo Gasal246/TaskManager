@@ -1,6 +1,6 @@
 import { QUERY_KEYS } from "../queryKeys";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { addNewArea, addNewRegion, addNewStaff, addStaffDocument, addStaffSkill, deleteArea, deleteRegion, deleteStaff, deleteStaffDocument, editAreaName, editRegionName, getAllAreas, getAllRegions, getAllStaffs, getAreaById, getOneStaff, getRegionById, removeStaffSkill, updateStaff, updateStaffStatus } from "./fn/adminFn";
+import { addDepartmentHead, addDepartmentRegion, addNewArea, addNewRegion, addNewStaff, addStaffDocument, addStaffSkill, deleteArea, deleteRegion, deleteStaff, deleteStaffDocument, editAreaName, editRegionName, getAllAreas, getAllDepartments, getAllRegions, getAllStaffs, getAreaById, getDepartmentById, getOneStaff, getRegionById, removeStaffSkill, updateStaff, updateStaffStatus } from "./fn/adminFn";
 
 export const useGetAllRegions = (adminid: string) => {
     return useQuery({
@@ -217,6 +217,50 @@ export const useUpdateUserStatus = () => {
             })
             queryClient.invalidateQueries({
                 queryKey: [QUERY_KEYS.GET_ALL_STAFF, data?.Addedby]
+            })
+        }
+    })
+}
+
+// ######## D E P A R T M E N T Quries #############
+export const useGetAllDepartments = (adminid: string) => {
+    return useQuery({
+        queryKey: [QUERY_KEYS.GET_ALL_DEPARTMENTS, adminid],
+        queryFn: async () => getAllDepartments(adminid),
+        enabled: !!adminid
+    })
+}
+
+export const useGetDepartmentById = (departmentid: string) => {
+    return useQuery({
+        queryKey: [QUERY_KEYS.GET_DEPARTMENT_BY_ID, departmentid],
+        queryFn: async () => getDepartmentById(departmentid),
+        enabled: !!departmentid
+    })
+}
+
+export const useAddDepartmentHead = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async ({ depid, staffid }: { depid: string, staffid: string }) => addDepartmentHead(depid, staffid),
+        onSuccess: (data: any) => {
+            queryClient.invalidateQueries({
+                queryKey: [QUERY_KEYS.GET_DEPARTMENT_BY_ID, data?._id]
+            })
+            queryClient.invalidateQueries({
+                queryKey: [QUERY_KEYS.GET_ALL_DEPARTMENTS, data?.AdminId],
+            })
+        }
+    })
+}
+
+export const useAddDepartmentRegion = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async ({ depid, regionid }: { depid: string, regionid: string }) => addDepartmentRegion(depid, regionid),
+        onSuccess: (data: any) => {
+            queryClient.invalidateQueries({
+                queryKey: [QUERY_KEYS.GET_DEPARTMENT_BY_ID, data?._id]
             })
         }
     })
