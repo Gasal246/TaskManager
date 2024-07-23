@@ -89,3 +89,93 @@ export async function deleteArea(areaid: string){
         console.log(error);
     }
 }
+
+export async function getAllStaffs(adminid: string){
+    try {
+        const res = await axios.get(`/api/staff/of-admin/${adminid}`);
+        return res.data;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export async function addNewStaff(formData: FormData){
+    try {
+        const res = await axios.post('/api/staff/add', formData);
+        return res.data;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export async function getOneStaff(staffid: string){
+    try {
+        const res = await axios.get(`/api/staff/get-staff/${staffid}`);
+        return res.data;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export async function addStaffSkill(staffId: string, skill: string){
+    try {
+        const res = await axios.post(`/api/staff/add-skill`, { staffId, skill });
+        return res.data;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export async function removeStaffSkill(staffId: string, skill: string){
+    try {
+        const res = await axios.post(`/api/staff/delete-skill`, { staffId, skill });
+        return res.data;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export async function addStaffDocument(formData: FormData){
+    try {
+        const res = await axios.post('/api/staff/add-doc', formData);
+        return res.data;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export async function deleteStaffDocument(staffid: string, docid: string){
+    try {
+        const res = await axios.post('/api/staff/delete-doc', { staffid, docid });
+        return res.data;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export async function deleteStaff(staffid: string){
+    try {
+        const res = await axios.post('/api/staff/delete', { staffid });
+        return res.data;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export async function updateStaff(staffid: string, Email: string, Name: string, Region: string, Area: string ){
+    try {
+        const res = await axios.post('/api/staff/edit-staff', { staffid, Email, Name, Region, Area });
+        return res.data;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export async function updateStaffStatus(staffid: string, status: StaffStatus){
+    try {
+        const res = await axios.post('/api/staff/status', { staffid, status });
+        return res.data;
+    } catch (error) {
+        console.log(error);
+    }
+}

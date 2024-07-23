@@ -13,6 +13,14 @@ export function formatDate(dateTimeString: string) {
   return date.toLocaleDateString('en-US', options);
 }
 
+export function formatDateShortly(dateTimeString: string) {
+  if (!dateTimeString) return ""; // handle case where dateTimeString is undefined or null
+
+  const date = new Date(dateTimeString);
+  const options:any = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',};
+  return date.toLocaleDateString('en-US', options);
+}
+
 export function generateOTP(): string {
   const digits = '0123456789';
   let OTP = '';

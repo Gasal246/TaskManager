@@ -22,6 +22,7 @@ export interface IUsers extends Document {
   VerifyCode: String | null;
   AvatarUrl: String | null;
   Status: String | null;
+  IsDeleted: Boolean;
 }
 
 const UsersSchema: Schema = new Schema({
@@ -44,7 +45,8 @@ const UsersSchema: Schema = new Schema({
   AvatarUrl: { type: String },
   Status: { type: String, enum: ['active', 'blocked', 'unverified']},
   Region: { type: Schema.Types.ObjectId, ref: "Regions" },
-  Area: { type: Schema.Types.ObjectId, ref: "Areas" }
+  Area: { type: Schema.Types.ObjectId, ref: "Areas" },
+  IsDeleted: { type: Boolean, default: false }
 }, { timestamps: true });
 
 const Users = mongoose.models?.Users || mongoose.model<IUsers>('Users', UsersSchema);

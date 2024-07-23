@@ -19,3 +19,23 @@ declare type AdminWithinDaysType = {
     from: string;
     to: string;
 }
+
+declare type DocType = {
+    name: string | null, 
+    fileUrl: string | null,
+    expireAt: Date | null,
+    remindMe: Date | null
+}
+
+declare type StaffData = {
+    Name: string,
+    Email: string,
+    Region: string,
+    Area: string,
+    documents: DocType[] | [],
+    Skills: string[]
+}
+
+declare type StaffStatus = 'active' | 'blocked' | 'unverified'
+
+declare module 'formidable-serverless';

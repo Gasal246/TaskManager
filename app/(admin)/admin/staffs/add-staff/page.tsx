@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client"
 import React, { useEffect, useState } from 'react'
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator, } from "@/components/ui/breadcrumb"
@@ -16,12 +17,17 @@ import { PlusCircleIcon, SquareX } from 'lucide-react'
 
 import { motion } from 'framer-motion'
 import { formatDate } from '@/lib/utils'
+import { useSession } from 'next-auth/react'
+import { useAddNewStaff, useGetAllAreas, useGetAllRegions } from '@/query/client/adminQueries'
+import LoaderSpin from '@/components/shared/LoaderSpin'
+import { toast } from 'sonner'
+import { useRouter } from 'next/navigation'
 
 const formSchema = z.object({
     Name: z.string().min(3, "Sorry! as per our business guidelines this is not a real name.").max(25),
     Email: z.string().email("Invalid email address").min(2).max(50),
     Region: z.string(),
-    Area: z.string().optional()
+    Area: z.string()
 })
 
 type SkillTag = {
@@ -32,6 +38,7 @@ type SkillTag = {
 type Document = {
     name: string,
     file: File | null,
+    fileUrl: string | null,
     expireAt: Date | null,
     remindMe: Date | null
 }
@@ -39,6 +46,10 @@ type Document = {
 const animatedComponents = makeAnimated();
 
 const AddStaff = () => {
+    const router = useRouter();
+    const { data: session }: any = useSession();
+    const { data: allRegions, isLoading: regionsLoading } = useGetAllRegions(session?.user?.id);
+    const { mutateAsync: addNewStaff, isPending: addingStaff } = useAddNewStaff();
     const [selectedSkillTags, setSelectedSkillTags] = useState<SkillTag[] | []>([])
 
     const [documents, setDocuments] = useState<Document[] | []>([])
@@ -49,7 +60,8 @@ const AddStaff = () => {
 
     const handleAddDoc = () => {
         if (!documentName || !documentFile || !expireAt || !remindMe) return null;
-        const newDoc: Document = { name: documentName, file: documentFile, expireAt: expireAt, remindMe: remindMe }
+        const docUrl = URL.createObjectURL(documentFile);
+        const newDoc: Document = { name: documentName, file: documentFile, fileUrl: docUrl, expireAt: expireAt, remindMe: remindMe }
         setDocuments([...documents, newDoc]);
         setDocumentName('');
         setDocumentFile(null);
@@ -67,25 +79,61 @@ const AddStaff = () => {
             Name: "",
             Email: "",
             Region: "",
-            Area: ""
+            Area: "",
         },
     })
 
-    function onSubmit(values: z.infer<typeof formSchema>) {
-        console.log(values)
+    const selectedRegion = form.watch('Region');
+
+    const { data: allAreas, isLoading: areasLoading, refetch: refetchAreas } = useGetAllAreas(selectedRegion);
+
+    useEffect(() => {
+        if (selectedRegion) {
+            refetchAreas();
+        }
+    }, [selectedRegion, refetchAreas]);
+
+    async function onSubmit(values: z.infer<typeof formSchema>) {
+        const formData = new FormData();
+        formData.append("Name", values.Name);
+        formData.append("Email", values.Email);
+        formData.append("Region", values.Region);
+        formData.append("Area", values.Area);
+
+        const skillArray = selectedSkillTags.map((skill) => skill.value );
+        formData.append("Skills", skillArray.join(','));
+
+        documents.forEach((doc, index) => {
+            formData.append(`documents[${index}][name]`, doc.name);
+            formData.append(`documents[${index}][file]`, doc.file as any);
+            formData.append(`documents[${index}][expireAt]`, doc.expireAt?.toISOString() as any);
+            formData.append(`documents[${index}][remindMe]`, doc.remindMe?.toISOString() as any);
+        });
+        
+        const response = await addNewStaff({formData});
+        if(response?.existing){
+            return toast.error("Email is already in use.", {
+                description: "This email is currently using by some of your staffs."
+            })
+        }
+        router.push('/admin/staffs');
+        return toast.success("New Staff Added Successfully.", {
+            description: "You just added a new Staff"
+        })
     }
 
     const handleRemoveDoc = (index: number) => {
         const updatedDox = documents.splice(index, 1)
         setDocuments(updatedDox)
     }
+
     return (
-        
-        <div className='p-5 overflow-y-scroll h-full pb-20'>
+
+        <div className='p-5 overflow-y-scroll h-[95dvh] pb-20'>
             <Breadcrumb>
                 <BreadcrumbList>
                     <BreadcrumbItem>
-                        <BreadcrumbLink href="/admin/staffs">staffs</BreadcrumbLink>
+                        <BreadcrumbLink href="/admin/staffs">Manage Staffs</BreadcrumbLink>
                     </BreadcrumbItem>
                     <BreadcrumbSeparator />
                     <BreadcrumbItem>
@@ -123,46 +171,50 @@ const AddStaff = () => {
                                 </FormItem>
                             )}
                         />
-                        <FormField
+                        {regionsLoading ? <LoaderSpin size={20} /> : <FormField
                             control={form.control}
                             name="Region"
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Region</FormLabel>
                                     <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                        <FormControl>
+                                        <FormControl className='border-border'>
                                             <SelectTrigger>
                                                 <SelectValue placeholder="select the staff region" />
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            <SelectItem value="nil">not clear</SelectItem>
+                                            {allRegions?.map((regions: any) => (
+                                                <SelectItem key={regions?._id} value={regions?._id}>{regions?.RegionName}</SelectItem>
+                                            ))}
                                         </SelectContent>
                                     </Select>
                                     <FormMessage />
                                 </FormItem>
                             )}
-                        />
-                        <FormField
+                        />}
+                        {areasLoading ? <LoaderSpin size={20} /> : <FormField
                             control={form.control}
                             name="Area"
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Area</FormLabel>
                                     <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                        <FormControl>
+                                        <FormControl className='border-border'>
                                             <SelectTrigger>
-                                                <SelectValue placeholder="select the staff region" />
+                                                <SelectValue placeholder="select the staff area" />
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            <SelectItem value="nil">not clear</SelectItem>
+                                            {allAreas?.map((area: any) => (
+                                                <SelectItem key={area?._id} value={area?._id}>{area?.Areaname}</SelectItem>
+                                            ))}
                                         </SelectContent>
                                     </Select>
                                     <FormMessage />
                                 </FormItem>
                             )}
-                        />
+                        />}
 
                         <div className="flex gap-2 relative items-center flex-wrap">
                             <div>

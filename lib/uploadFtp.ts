@@ -1,5 +1,6 @@
 import * as ftp from 'basic-ftp';
 import * as path from 'path';
+import fetch from 'node-fetch'; // Ensure to install node-fetch or use a similar library
 
 interface UploadOptions {
     userId: string;
@@ -7,36 +8,47 @@ interface UploadOptions {
     fileName: string;
 }
 
-async function uploadToFtp(localFilePath: string, options: UploadOptions): Promise<string | null> {
+async function uploadBlobToFtp(blobUrl: string, options: UploadOptions): Promise<string | null> {
     const client = new ftp.Client();
     client.ftp.verbose = true;
-    let remoteFilePath = `/${options.fileType}/${options.userId}/${options.fileName}`;
+    const remoteFilePath = `/${options.fileType}/${options.userId}/${options.fileName}`;
 
     try {
+        // Fetch the blob content
+        const response = await fetch(blobUrl);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch blob: ${response.statusText}`);
+        }
+        const blobBuffer = await response.buffer(); // Get blob as a buffer
+
+        // Connect to the FTP server
         await client.access({
             host: process.env.FTP_SERVER,
             port: Number(process.env.FTP_PORT),
             user: process.env.FTP_USER,
-            password: process.env.FTP_PASSWORD,
+            password: 'Wideline@123#',
             secure: false
         });
 
-        const remoteDir = path.dirname(remoteFilePath); // Correct Path type DIR
-        await client.ensureDir(remoteDir); // Ensure the existence of DIR
+        // Ensure the directory exists
+        const remoteDir = path.dirname(remoteFilePath);
+        await client.ensureDir(remoteDir);
 
-        await client.uploadFrom(localFilePath, remoteFilePath); // Upload file
+        // Upload the blob content
+        await client.uploadFrom(Buffer.from(blobBuffer) as any, remoteFilePath);
+
         const fileUrl = `http://${process.env.FTP_SERVER}/${remoteFilePath}`;
 
         console.log("File Uploaded Successfully.");
         console.log("File Url: ", fileUrl);
 
-        return fileUrl; // Returning Download Url.
+        return fileUrl;
     } catch (error) {
-        console.log("Filed to upload File: ", error);
+        console.log("Failed to upload file: ", error);
         return null;
     } finally {
-        client.close(); // Close the connection
+        client.close();
     }
 }
 
-export default uploadToFtp;
+export default uploadBlobToFtp;

@@ -1,6 +1,6 @@
 import { QUERY_KEYS } from "../queryKeys";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { addNewArea, addNewRegion, deleteArea, deleteRegion, editAreaName, editRegionName, getAllAreas, getAllRegions, getAreaById, getRegionById } from "./fn/adminFn";
+import { addNewArea, addNewRegion, addNewStaff, addStaffDocument, addStaffSkill, deleteArea, deleteRegion, deleteStaff, deleteStaffDocument, editAreaName, editRegionName, getAllAreas, getAllRegions, getAllStaffs, getAreaById, getOneStaff, getRegionById, removeStaffSkill, updateStaff, updateStaffStatus } from "./fn/adminFn";
 
 export const useGetAllRegions = (adminid: string) => {
     return useQuery({
@@ -41,7 +41,7 @@ export const useGetAllAreas = (regionId: string) => {
 export const useAddNewArea = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: ({ name, regionId }:{name: string, regionId: string}) => addNewArea(name, regionId),
+        mutationFn: ({ name, regionId }: { name: string, regionId: string }) => addNewArea(name, regionId),
         onSuccess: (data: any) => {
             queryClient.invalidateQueries({
                 queryKey: [QUERY_KEYS.GET_AREAS_REGIONID, data?.RegionId]
@@ -53,7 +53,7 @@ export const useAddNewArea = () => {
 export const useEditRegionName = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: ({ name, regionId }:{name: string, regionId: string}) => editRegionName(name, regionId),
+        mutationFn: ({ name, regionId }: { name: string, regionId: string }) => editRegionName(name, regionId),
         onSuccess: (data: any) => {
             queryClient.invalidateQueries({
                 queryKey: [QUERY_KEYS.GET_REGION_ID, data?._id]
@@ -74,7 +74,7 @@ export const useDeleteRegion = () => {
                 queryKey: [QUERY_KEYS.GET_REGIONS_ADMINID, data?.Administrator]
             })
         }
-    }) 
+    })
 }
 
 export const useGetAreaById = (areaid: string) => {
@@ -88,7 +88,7 @@ export const useGetAreaById = (areaid: string) => {
 export const useEditAreaName = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: ({ name, areaid }:{ name: string, areaid: string }) => editAreaName(name, areaid),
+        mutationFn: ({ name, areaid }: { name: string, areaid: string }) => editAreaName(name, areaid),
         onSuccess: (data: any) => {
             queryClient.invalidateQueries({
                 queryKey: [QUERY_KEYS.GET_AREA_ID, data?._id]
@@ -104,6 +104,119 @@ export const useDeleteArea = () => {
         onSuccess: (data: any) => {
             queryClient.invalidateQueries({
                 queryKey: [QUERY_KEYS.GET_AREA_ID, data?._id]
+            })
+        }
+    })
+}
+
+export const useGetAllStaffs = (adminid: string) => {
+    return useQuery({
+        queryKey: [QUERY_KEYS.GET_ALL_STAFF, adminid],
+        queryFn: async () => getAllStaffs(adminid),
+        enabled: !!adminid
+    })
+}
+
+export const useAddNewStaff = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async ({ formData }: { formData: FormData }) => addNewStaff(formData),
+    })
+}
+
+export const useGetStaff = (staffid: string) => {
+    return useQuery({
+        queryKey: [QUERY_KEYS.GET_STAFF, staffid],
+        queryFn: async () => getOneStaff(staffid),
+        enabled: !!staffid
+    })
+}
+
+export const useAddSkillToStaff = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async ({ staffId, skill }: { staffId: string, skill: string }) => addStaffSkill(staffId, skill),
+        onSuccess: (data: any) => {
+            queryClient.invalidateQueries({
+                queryKey: [QUERY_KEYS.GET_STAFF, data?._id]
+            })
+        }
+    })
+}
+
+export const useRemoveSkill = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async ({ staffId, skill }: { staffId: string, skill: string }) => removeStaffSkill(staffId, skill),
+        onSuccess: (data: any) => {
+            queryClient.invalidateQueries({
+                queryKey: [QUERY_KEYS.GET_STAFF, data?._id]
+            })
+        }
+    })
+}
+
+export const useAddNewStaffDocument = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async ({ formData }: { formData: FormData }) => addStaffDocument(formData),
+        onSuccess: (data: any) => {
+            queryClient.invalidateQueries({
+                queryKey: [QUERY_KEYS.GET_STAFF, data?._id]
+            })
+        }
+    })
+}
+
+export const useDeleteStaffDocument = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async ({ staffid, docid }: { staffid: string, docid: string }) => deleteStaffDocument(staffid, docid),
+        onSuccess: (data: any) => {
+            queryClient.invalidateQueries({
+                queryKey: [QUERY_KEYS.GET_STAFF, data?._id]
+            })
+        }
+    })
+}
+
+export const useDeleteStaff = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async (staffid: string) => deleteStaff(staffid),
+        onSuccess: (data: any) => {
+            queryClient.invalidateQueries({
+                queryKey: [QUERY_KEYS.GET_ALL_STAFF, data?.Addedby]
+            })
+        }
+    })
+}
+
+export const useUpdateStaff = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async ({ staffid, Email, Name, Region, Area }: { staffid: string, Email: string, Name: string, Region: string, Area: string }) => updateStaff(staffid, Email, Name, Region, Area),
+        onSuccess: (data: any) => {
+            queryClient.invalidateQueries({
+                queryKey: [QUERY_KEYS.GET_STAFF, data?._id]
+            })
+            queryClient.invalidateQueries({
+                queryKey: [QUERY_KEYS.GET_ALL_STAFF, data?.Addedby]
+            })
+        }
+    })
+}
+
+export const useUpdateUserStatus = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async ({ staffid, status }: { staffid: string, status: StaffStatus }) => updateStaffStatus(staffid, status),
+        onSuccess: (data: any) => {
+            queryClient.invalidateQueries({
+                queryKey: [QUERY_KEYS.GET_STAFF, data?._id]
+            })
+            queryClient.invalidateQueries({
+                queryKey: [QUERY_KEYS.GET_ALL_STAFF, data?.Addedby]
             })
         }
     })
