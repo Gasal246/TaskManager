@@ -23,7 +23,7 @@ const HomeLayout = async ({ children }: {
         return redirect('/superadmin')
     }
     const response: userTypes[] = await getUserAuth(session?.user?.id);
-    if (response?.includes("admin") || response?.includes("regional_head") || response?.includes("area_head")) {
+    if (response?.includes("admin")) {
         return redirect('/admin');
     }
     return (

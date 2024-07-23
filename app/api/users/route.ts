@@ -13,9 +13,7 @@ export async function GET(req: NextRequest){
             throw new Error(`User not found for id: ${userid}`); 
         }
         const roles: userTypes[] = [];
-        if (user.IsAdmin) roles.push('admin');
-        if (user.IsRegionalHead) roles.push('regional_head');
-        if (user.IsAreaHead) roles.push('area_head');
+        if (user?.IsAdmin) roles.push('admin');
         if (roles.length === 0) roles.push('staff');
         return Response.json(roles);
     } catch (error) {
