@@ -1,12 +1,12 @@
 import connectDB from "@/lib/mongo";
-import NextAuth from "next-auth/next";
+import NextAuth, { AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { compare } from 'bcrypt-ts'
 import Users from "@/models/userCollection";
 import Superadmin from "@/models/superAdminCollection";
 
 
-export const authOptions: any = {
+export const authOptions: AuthOptions = {
     providers: [
         CredentialsProvider({
             id: 'credentials',
