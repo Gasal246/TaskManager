@@ -10,11 +10,11 @@ import { NextApiRequest } from "next";
 
 connectDB();
 
-export const config = {
-    api: {
-        bodyParser: false,
-    },
-};
+// export const config = {
+//     api: {
+//         bodyParser: false,
+//     },
+// };
 
 interface Body {
     staffid: string;

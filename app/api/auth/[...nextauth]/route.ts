@@ -6,7 +6,7 @@ import Users from "@/models/userCollection";
 import Superadmin from "@/models/superAdminCollection";
 
 
-export const authOptions: any = {
+export const authOptions = {
     providers: [
         CredentialsProvider({
             id: 'credentials',
