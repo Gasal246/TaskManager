@@ -1,6 +1,6 @@
 import { QUERY_KEYS } from "../queryKeys";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { addDepartmentHead, addDepartmentRegion, addNewArea, addNewRegion, addNewStaff, addStaffDocument, addStaffSkill, deleteArea, deleteRegion, deleteStaff, deleteStaffDocument, editAreaName, editRegionName, getAllAreas, getAllDepartments, getAllRegions, getAllStaffs, getAreaById, getDepartmentById, getOneStaff, getRegionById, removeStaffSkill, updateStaff, updateStaffStatus } from "./fn/adminFn";
+import { addDepartmentArea, addDepartmentHead, addDepartmentRegion, addNewArea, addNewRegion, addNewStaff, addStaffDocument, addStaffSkill, deleteArea, deleteDepartmentArea, deleteDepartmentRegion, deleteRegion, deleteStaff, deleteStaffDocument, editAreaName, editRegionName, getAllAreas, getAllDepartments, getAllRegions, getAllStaffs, getAreaById, getDepartmentById, getDepartmentRegion, getOneStaff, getRegionById, removeStaffSkill, updateStaff, updateStaffStatus } from "./fn/adminFn";
 
 export const useGetAllRegions = (adminid: string) => {
     return useQuery({
@@ -261,6 +261,53 @@ export const useAddDepartmentRegion = () => {
         onSuccess: (data: any) => {
             queryClient.invalidateQueries({
                 queryKey: [QUERY_KEYS.GET_DEPARTMENT_BY_ID, data?._id]
+            })
+        }
+    })
+}
+
+export const useGetDepartmentRegion = (depid: string, regionid: string) => {
+    return useQuery({
+        queryKey: [QUERY_KEYS.GET_DEPARTMENT_REGION, depid, regionid],
+        queryFn: async () => getDepartmentRegion(depid, regionid),
+        enabled: !!depid
+    })
+}
+
+export const useAddDepartmentArea = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async ({ depid, regionid, areaid }: { depid: string, regionid: string, areaid: string }) => addDepartmentArea(depid, regionid, areaid),
+        onSuccess: (data: any) => {
+            queryClient.invalidateQueries({
+                queryKey: [QUERY_KEYS.GET_DEPARTMENT_REGION, data?._id]
+            })
+        }
+    })
+}
+
+export const useDeleteDepartmentRegion = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async ({ depid, regionid }: { depid: string, regionid: string }) => deleteDepartmentRegion(depid, regionid),
+        onSuccess: (data: any) => {
+            queryClient.invalidateQueries({
+                queryKey: [QUERY_KEYS.GET_DEPARTMENT_BY_ID, data?._id]
+            })
+        }
+    })
+}
+
+export const useDeleteDepartmentArea = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async ({ depid, regionid, areaid }: { depid: string, regionid: string, areaid: string }) => deleteDepartmentArea(depid, regionid, areaid),
+        onSuccess: (data: any) => {
+            queryClient.invalidateQueries({
+                queryKey: [QUERY_KEYS.GET_DEPARTMENT_REGION, data?.depid, data?.regionid]
+            })
+            queryClient.invalidateQueries({
+                queryKey: [QUERY_KEYS.GET_DEPARTMENT_BY_ID, data?.depid]
             })
         }
     })

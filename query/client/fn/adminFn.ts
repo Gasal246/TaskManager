@@ -217,3 +217,39 @@ export async function addDepartmentRegion(depid: string, regionid: string){
         console.log(error);
     }
 }
+
+export async function getDepartmentRegion(depid: string, regionid: string){
+    try {
+        const res = await axios.get(`/api/department/get-id/${depid}/${regionid}`);
+        return res.data;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export async function addDepartmentArea(depid: string, regionid: string, areaid: string){
+    try {
+        const res = await axios.post('/api/department/add-area', { depid, regionid, areaid });
+        return res.data;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export async function deleteDepartmentRegion(depid: string, regionid: string){
+    try {
+        const res = await axios.post('/api/department/delete-region', { depid, regionid });
+        return res.data;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export async function deleteDepartmentArea(depid: string, regionid: string, areaid: string){
+    try {
+        const res = await axios.post('/api/department/delete-area', { depid, regionid, areaid });
+        return res.data;
+    } catch (error) {
+        console.log(error);
+    }
+}

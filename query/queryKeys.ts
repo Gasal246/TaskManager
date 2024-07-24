@@ -16,6 +16,7 @@ export enum QUERY_KEYS {
     GET_STAFF = "getStaffByStaffId",
     GET_ALL_DEPARTMENTS = "getAllDepartmentsByAdminId",
     GET_DEPARTMENT_BY_ID = "getDepartmentById",
+    GET_DEPARTMENT_REGION = "getDepartmentRegion",
 
     // user keys
     GET_USER_BY_ID = "getUserByUserid",
