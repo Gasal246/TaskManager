@@ -299,3 +299,22 @@ export async function addAreaHead(areaid: string, staffid: string){
         console.log(error);
     }
 }
+
+export async function editProfileInfo( userid: string, email: string, name: string ){
+    try {
+        const res = await axios.post('/api/admin/edit-info', { userid, email, name });
+        return res.data;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export async function changeProfilePic( formData: FormData ){
+    try {
+        const res = await axios.post('/api/users/change-pfp', formData );
+        return res.data;
+    } catch (error) {
+        console.log(error);
+    }
+}
+

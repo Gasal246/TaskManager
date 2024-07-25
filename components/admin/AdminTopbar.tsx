@@ -7,9 +7,13 @@ import { motion } from 'framer-motion'
 import { ExitIcon } from '@radix-ui/react-icons'
 import { signOut, useSession } from 'next-auth/react'
 import { useFindUserById } from '@/query/client/userQueries'
+import { Avatar } from 'antd'
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger, } from "@/components/ui/alert-dialog"
+import { useRouter } from 'next/navigation'
 
 const AdminTopbar = () => {
-    const {data: session}: any = useSession();
+    const router = useRouter();
+    const { data: session }: any = useSession();
     const { data: currentUser, isLoading: currentUserDataLoading } = useFindUserById(session?.user?.id);
     return (
         <div className='w-full h-14 dark:bg-slate-900 bg-slate-400 px-10 flex items-center'>
@@ -22,17 +26,29 @@ const AdminTopbar = () => {
                     currentUser &&
                     <Popover>
                         <PopoverTrigger>
-                            <motion.div whileTap={{ scale: 0.98 }} className="px-3 flex gap-1 items-center">
-                                <CircleUser size={25} />
+                            <motion.div whileTap={{ scale: 0.98 }} className="px-3 flex gap-1 items-center hover:bg-black py-1 rounded-full">
+                                <Avatar src={currentUser?.AvatarUrl || '/avatar.png'} />
                                 <div className='text-start'>
-                                    <h1 className='font-medium text-sm'>{currentUser?.Name}</h1>
-                                    <h1 className='font-medium text-xs'>{currentUser?.Email}</h1>
+                                    <h1 className='font-medium text-sm leading-4 text-slate-300'>{currentUser?.Name}</h1>
+                                    <h1 className='font-medium text-xs text-slate-400'>{currentUser?.Email}</h1>
                                 </div>
                             </motion.div>
                         </PopoverTrigger>
                         <PopoverContent className='w-40 p-2 space-y-2'>
-                            <motion.button whileTap={{ scale: 0.98 }} className='w-full bg-secondary rounded-sm p-1 text-sm flex gap-1 items-center justify-center'><CircleUser size={16} strokeWidth={2} /> Profile </motion.button>
-                            <motion.button onClick={() => signOut()} whileTap={{ scale: 0.98 }} className='w-full bg-destructive text-destructive-foreground rounded-sm p-1 text-sm flex gap-1 items-center justify-center'><ExitIcon /> Sign Out</motion.button>
+                            <motion.button onClick={() => router.push(`/admin/profile/${currentUser?._id}`)} whileTap={{ scale: 0.98 }} className='w-full bg-secondary hover:bg-slate-700 rounded-sm p-1 text-sm flex gap-1 items-center justify-center'><CircleUser size={16} strokeWidth={2} /> Profile </motion.button>
+                            <AlertDialog>
+                                <AlertDialogTrigger className='w-full'><motion.h1 whileTap={{ scale: 0.98 }} className='w-full bg-destructive text-destructive-foreground hover:bg-red-700 rounded-sm p-1 text-sm flex gap-1 items-center justify-center'><ExitIcon /> Sign Out</motion.h1></AlertDialogTrigger>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>Signing Out?</AlertDialogTitle>
+                                        <AlertDialogDescription>Are you trying to signOut of application ?</AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel onClick={() => signOut()} >Yes</AlertDialogCancel>
+                                        <AlertDialogAction>No</AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
                         </PopoverContent>
                     </Popover>
                 }

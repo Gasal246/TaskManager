@@ -1,6 +1,6 @@
 import { QUERY_KEYS } from "../queryKeys";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { addAreaHead, addDepartmentArea, addDepartmentHead, addDepartmentRegion, addNewArea, addNewRegion, addNewStaff, addRegionalHead, addStaffDocument, addStaffSkill, addStaffToDepartment, deleteArea, deleteDepartmentArea, deleteDepartmentRegion, deleteRegion, deleteStaff, deleteStaffDocument, editAreaName, editRegionName, getAllAreas, getAllDepartments, getAllRegions, getAllStaffs, getAreaById, getDepartmentById, getDepartmentRegion, getDepartmentStaffs, getOneStaff, getRegionById, getStaffsRegionAndArea, removeStaffSkill, updateStaff, updateStaffStatus } from "./fn/adminFn";
+import { addAreaHead, addDepartmentArea, addDepartmentHead, addDepartmentRegion, addNewArea, addNewRegion, addNewStaff, addRegionalHead, addStaffDocument, addStaffSkill, addStaffToDepartment, changeProfilePic, deleteArea, deleteDepartmentArea, deleteDepartmentRegion, deleteRegion, deleteStaff, deleteStaffDocument, editAreaName, editProfileInfo, editRegionName, getAllAreas, getAllDepartments, getAllRegions, getAllStaffs, getAreaById, getDepartmentById, getDepartmentRegion, getDepartmentStaffs, getOneStaff, getRegionById, getStaffsRegionAndArea, removeStaffSkill, updateStaff, updateStaffStatus } from "./fn/adminFn";
 
 export const useGetAllRegions = (adminid: string) => {
     return useQuery({
@@ -368,3 +368,26 @@ export const useAddAreaHead = () => {
     })
 }
 
+export const useEditProfileInfo = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async ({ userid, email, name }: { userid: string, email: string, name: string }) => editProfileInfo(userid, email, name),
+        onSuccess: (data: any) => {
+            queryClient.invalidateQueries({
+                queryKey: [QUERY_KEYS.GET_USER_BY_ID, data?._id]
+            })
+        }
+    })
+}
+
+export const useUpdatePfp = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async ({ formData }: { formData: FormData }) => changeProfilePic(formData),
+        onSuccess: (data: any) => {
+            queryClient.invalidateQueries({
+                queryKey: [QUERY_KEYS.GET_USER_BY_ID, data?._id]
+            })
+        }
+    })
+}
