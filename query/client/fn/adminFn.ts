@@ -253,3 +253,49 @@ export async function deleteDepartmentArea(depid: string, regionid: string, area
         console.log(error);
     }
 }
+
+export async function getStaffsRegionAndArea(adminid: string){
+    try {
+        const res = await axios.get(`/api/staff/get-staffs-region-area/${adminid}`);
+        return res.data;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export async function addStaffToDepartment(depid: string, staffid: string, areaid?: string){
+    try {
+        const res = await axios.post('/api/department/add-staff', { depid, staffid, areaid });
+        return res.data;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export async function getDepartmentStaffs(depid: string, regionid?: string, areaid?: string){
+    try {
+        const res = await axios.get(`/api/department/get-staffs/${depid}${regionid ? '?regionid='+regionid : ''}${areaid ? '?areaid='+areaid : ''}`);
+        console.log(res.data)
+        return res.data;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export async function addRegionalHead(regionid: string, staffid: string){
+    try {
+        const res = await axios.post('/api/region/add-head', { regionid, staffid });
+        return res.data;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export async function addAreaHead(areaid: string, staffid: string){
+    try {
+        const res = await axios.post('/api/area/add-head', { areaid, staffid });
+        return res.data;
+    } catch (error) {
+        console.log(error);
+    }
+}

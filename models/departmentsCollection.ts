@@ -16,7 +16,11 @@ const DepartmentsSchema: Schema = new Schema({
   AdminId: { type: Schema.Types.ObjectId, required: true, ref: "Users" },
   DepartmentName: { type: String, required: true },
   DepartmentHead: { type: Schema.Types.ObjectId, ref: "Users" },
-  Staffs: [{ type: Schema.Types.ObjectId, ref: "Users" }],
+  Staffs: [{
+    StaffId: { type: Schema.Types.ObjectId, ref: "Users" },
+    AreaId: { type: Schema.Types.ObjectId, ref: "Areas" },
+    RegionId: { type: Schema.Types.ObjectId, ref: "Regions" }
+  }],
   Regions: [
     {
       RegionId: { type: Schema.Types.ObjectId, ref: "Regions" },

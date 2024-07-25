@@ -1,11 +1,11 @@
 import { QUERY_KEYS } from "../queryKeys";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { addDepartmentArea, addDepartmentHead, addDepartmentRegion, addNewArea, addNewRegion, addNewStaff, addStaffDocument, addStaffSkill, deleteArea, deleteDepartmentArea, deleteDepartmentRegion, deleteRegion, deleteStaff, deleteStaffDocument, editAreaName, editRegionName, getAllAreas, getAllDepartments, getAllRegions, getAllStaffs, getAreaById, getDepartmentById, getDepartmentRegion, getOneStaff, getRegionById, removeStaffSkill, updateStaff, updateStaffStatus } from "./fn/adminFn";
+import { addAreaHead, addDepartmentArea, addDepartmentHead, addDepartmentRegion, addNewArea, addNewRegion, addNewStaff, addRegionalHead, addStaffDocument, addStaffSkill, addStaffToDepartment, deleteArea, deleteDepartmentArea, deleteDepartmentRegion, deleteRegion, deleteStaff, deleteStaffDocument, editAreaName, editRegionName, getAllAreas, getAllDepartments, getAllRegions, getAllStaffs, getAreaById, getDepartmentById, getDepartmentRegion, getDepartmentStaffs, getOneStaff, getRegionById, getStaffsRegionAndArea, removeStaffSkill, updateStaff, updateStaffStatus } from "./fn/adminFn";
 
 export const useGetAllRegions = (adminid: string) => {
     return useQuery({
         queryKey: [QUERY_KEYS.GET_REGIONS_ADMINID, adminid],
-        queryFn: async () => getAllRegions(adminid),
+        queryFn: async () => await getAllRegions(adminid),
         enabled: !!adminid
     })
 }
@@ -33,7 +33,7 @@ export const useGetRegionById = (regid: string) => {
 export const useGetAllAreas = (regionId: string) => {
     return useQuery({
         queryKey: [QUERY_KEYS.GET_AREAS_REGIONID, regionId],
-        queryFn: async () => getAllAreas(regionId),
+        queryFn: async () => await getAllAreas(regionId),
         enabled: !!regionId
     })
 }
@@ -80,7 +80,7 @@ export const useDeleteRegion = () => {
 export const useGetAreaById = (areaid: string) => {
     return useQuery({
         queryKey: [QUERY_KEYS.GET_AREA_ID, areaid],
-        queryFn: async () => getAreaById(areaid),
+        queryFn: async () => await getAreaById(areaid),
         enabled: !!areaid
     })
 }
@@ -112,7 +112,7 @@ export const useDeleteArea = () => {
 export const useGetAllStaffs = (adminid: string) => {
     return useQuery({
         queryKey: [QUERY_KEYS.GET_ALL_STAFF, adminid],
-        queryFn: async () => getAllStaffs(adminid),
+        queryFn: async () => await getAllStaffs(adminid),
         enabled: !!adminid
     })
 }
@@ -127,7 +127,7 @@ export const useAddNewStaff = () => {
 export const useGetStaff = (staffid: string) => {
     return useQuery({
         queryKey: [QUERY_KEYS.GET_STAFF, staffid],
-        queryFn: async () => getOneStaff(staffid),
+        queryFn: async () => await getOneStaff(staffid),
         enabled: !!staffid
     })
 }
@@ -226,7 +226,7 @@ export const useUpdateUserStatus = () => {
 export const useGetAllDepartments = (adminid: string) => {
     return useQuery({
         queryKey: [QUERY_KEYS.GET_ALL_DEPARTMENTS, adminid],
-        queryFn: async () => getAllDepartments(adminid),
+        queryFn: async () => await getAllDepartments(adminid),
         enabled: !!adminid
     })
 }
@@ -234,7 +234,7 @@ export const useGetAllDepartments = (adminid: string) => {
 export const useGetDepartmentById = (departmentid: string) => {
     return useQuery({
         queryKey: [QUERY_KEYS.GET_DEPARTMENT_BY_ID, departmentid],
-        queryFn: async () => getDepartmentById(departmentid),
+        queryFn: async () => await getDepartmentById(departmentid),
         enabled: !!departmentid
     })
 }
@@ -269,7 +269,7 @@ export const useAddDepartmentRegion = () => {
 export const useGetDepartmentRegion = (depid: string, regionid: string) => {
     return useQuery({
         queryKey: [QUERY_KEYS.GET_DEPARTMENT_REGION, depid, regionid],
-        queryFn: async () => getDepartmentRegion(depid, regionid),
+        queryFn: async () => await getDepartmentRegion(depid, regionid),
         enabled: !!depid
     })
 }
@@ -312,3 +312,59 @@ export const useDeleteDepartmentArea = () => {
         }
     })
 }
+
+export const useGetStaffsRegionArea = (adminid: string) => {
+    return useQuery({
+        queryKey: [QUERY_KEYS.GET_STAFFS_REGION_AREA, adminid],
+        queryFn: async () => await getStaffsRegionAndArea(adminid),
+        enabled: !!adminid
+    })
+}
+
+export const useGetDepartmentStaffs = ({ depid, regionid, areaid }: { depid: string, regionid?: string, areaid?: string }) => {
+    return useQuery({
+        queryKey: [QUERY_KEYS.GET_DEPARTMENT_STAFFS, depid, regionid || areaid],
+        queryFn: async () => await getDepartmentStaffs(depid, regionid, areaid),
+        enabled: !!depid
+    })
+}
+
+export const useAddStaffFromDepArea = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async ({ depid, staffid, areaid }: { depid: string, staffid: string, areaid: string }) => addStaffToDepartment(depid, staffid, areaid),
+        onSuccess: (data: any) => {
+            queryClient.invalidateQueries({
+                queryKey: [QUERY_KEYS.GET_DEPARTMENT_STAFFS]
+            })
+            queryClient.invalidateQueries({
+                queryKey: [QUERY_KEYS.GET_DEPARTMENT_STAFFS, data?._id, data?.RegionId || data?.AreaId]
+            })
+        }
+    })
+} 
+
+export const useAddRegionHead = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async ({ regionid, staffid }: { regionid: string, staffid: string }) => addRegionalHead(regionid, staffid),
+        onSuccess: (data: any) => {
+            queryClient.invalidateQueries({
+                queryKey: [QUERY_KEYS.GET_REGION_ID, data?._id]
+            })
+        }
+    })
+}
+
+export const useAddAreaHead = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async ({ areaid, staffid }: { areaid: string, staffid: string }) => addAreaHead(areaid, staffid),
+        onSuccess: (data: any) => {
+            queryClient.invalidateQueries({
+                queryKey: [QUERY_KEYS.GET_AREA_ID, data?._id]
+            })
+        }
+    })
+}
+

@@ -10,6 +10,7 @@ import { useDeleteDepartmentRegion, useGetDepartmentById, useGetDepartmentRegion
 import { Avatar, Tooltip } from 'antd'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger, } from "@/components/ui/alert-dialog"
 import { toast } from 'sonner'
+import LoaderSpin from '@/components/shared/LoaderSpin'
 
 const DepartmentRegion = ({ params }: { params: { department: string, region: string } }) => {
   const router = useRouter()
@@ -18,7 +19,7 @@ const DepartmentRegion = ({ params }: { params: { department: string, region: st
   const { mutateAsync: deleteRegion, isPending: deletingRegion } = useDeleteDepartmentRegion();
   const handleDeleteRegion = async () => {
     const response = await deleteRegion({ depid: params?.department, regionid: params?.region });
-    if(response?._id){
+    if (response?._id) {
       router.replace(`/admin/departments/${params.department}`)
       return toast.success("Region Successfully Deleted.")
     }
@@ -26,81 +27,84 @@ const DepartmentRegion = ({ params }: { params: { department: string, region: st
   }
   return (
     <div className='p-4 overflow-y-scroll h-screen pb-20'>
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink href="/admin/departments">departments</BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbLink href={`/admin/departments/${params?.department}`}>{department?.DepartmentName}</BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>{departmentRegion?.RegionId?.RegionName}</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className='font-bold text-2xl mb-1'>Region {departmentRegion?.RegionId?.RegionName}</h1>
-          {departmentRegion?.RegionId?.RegionHead ? <Tooltip title="Area Head">
-            <div className="flex items-center gap-1">
-              <Avatar src={departmentRegion?.RegionId?.RegionHead?.AvatarUrl ? `${departmentRegion?.RegionId?.RegionHead?.AvatarUrl}` : '/avatar.png'} />
-              <div>
-                <h1 className='leading-3 text-sm'>{departmentRegion?.RegionId?.RegionHead?.Name}</h1>
-                <h1 className='text-xs'>{departmentRegion?.RegionId?.RegionHead?.Email}</h1>
-              </div>
+      {loadingDepartment || loadingDepartmentRegion ? <div className="w-full h-full justify-center items-center flex"> <LoaderSpin size={60} /></div> :
+        <>
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/admin/departments">departments</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink href={`/admin/departments/${params?.department}`}>{department?.DepartmentName}</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>{departmentRegion?.RegionId?.RegionName}</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className='font-bold text-2xl mb-1'>Region {departmentRegion?.RegionId?.RegionName}</h1>
+              {departmentRegion?.RegionId?.RegionHead ? <Tooltip title="Area Head">
+                <div className="flex items-center gap-1">
+                  <Avatar src={departmentRegion?.RegionId?.RegionHead?.AvatarUrl ? `${departmentRegion?.RegionId?.RegionHead?.AvatarUrl}` : '/avatar.png'} />
+                  <div>
+                    <h1 className='leading-3 text-sm'>{departmentRegion?.RegionId?.RegionHead?.Name}</h1>
+                    <h1 className='text-xs'>{departmentRegion?.RegionId?.RegionHead?.Email}</h1>
+                  </div>
+                </div>
+              </Tooltip> : <h1 className="text-xs text-orange-600">no region head added</h1>}
             </div>
-          </Tooltip> : <h1 className="text-xs text-orange-600">no region head added</h1>}
-        </div>
-        <div className="flex gap-2">
-          <AddDepartmentArea trigger={
-            <motion.h1 whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className='p-2 hover:bg-cyan-950 rounded-full px-6 border-2 border-slate-400 cursor-pointer'>
-              Add Dep Area
-            </motion.h1>
-          } departmentId={params.department} regionId={params.region} />
-          <Link href={`/admin/regions/${params.region}`}>
-            <motion.h1 whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className='p-2 hover:bg-cyan-950 rounded-full px-6 border-2 border-slate-400 cursor-pointer'>
-              Manage Region
-            </motion.h1>
-          </Link>
-          <AlertDialog>
-            <AlertDialogTrigger>
-              <motion.h1 whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className='p-2 hover:bg-red-700 rounded-full px-6 border-2 border-slate-400 cursor-pointer'>
-                Delete Region
-              </motion.h1>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This will permanently remove this Region and its data from our servers.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDeleteRegion}>Continue</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </div>
-      </div>
-      <h1 className='mt-3'>Department Areas ({departmentRegion?.Areas?.length})</h1>
-      <div className='flex flex-wrap'>
-        {
-          departmentRegion?.Areas?.map((area: any) => (
-            <div className="w-full md:w-3/12 p-1" key={area?._id}>
-              <Link href={`/admin/departments/${params?.department}/${params?.region}/${area?._id}`}>
-                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="w-full h-full bg-sky-700 p-2 flex items-center justify-center gap-1 rounded-sm hover:shadow-md cursor-pointer">
-                  <LandPlot size={18} />
-                  <h1>{area?.Areaname}</h1>
-                </motion.div>
+            <div className="flex gap-2">
+              <AddDepartmentArea trigger={
+                <motion.h1 whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className='p-2 hover:bg-cyan-950 rounded-full px-6 border-2 border-slate-400 cursor-pointer'>
+                  Add Dep Area
+                </motion.h1>
+              } departmentId={params.department} regionId={params.region} />
+              <Link href={`/admin/regions/${params.region}`}>
+                <motion.h1 whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className='p-2 hover:bg-cyan-950 rounded-full px-6 border-2 border-slate-400 cursor-pointer'>
+                  Manage Region
+                </motion.h1>
               </Link>
+              <AlertDialog>
+                <AlertDialogTrigger>
+                  <motion.h1 whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className='p-2 hover:bg-red-700 rounded-full px-6 border-2 border-slate-400 cursor-pointer'>
+                    Delete Region
+                  </motion.h1>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will permanently remove this Region and its data from our servers.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDeleteRegion}>Continue</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
-          ))
-        }
-      </div>
+          </div>
+          <h1 className='mt-3'>Department Areas ({departmentRegion?.Areas?.length})</h1>
+          <div className='flex flex-wrap'>
+            {
+              departmentRegion?.Areas?.map((area: any) => (
+                <div className="w-full md:w-3/12 p-1" key={area?._id}>
+                  <Link href={`/admin/departments/${params?.department}/${params?.region}/${area?._id}`}>
+                    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="w-full h-full bg-sky-700 p-2 flex items-center justify-center gap-1 rounded-sm hover:shadow-md cursor-pointer">
+                      <LandPlot size={18} />
+                      <h1>{area?.Areaname}</h1>
+                    </motion.div>
+                  </Link>
+                </div>
+              ))
+            }
+          </div></>
+      }
     </div>
   )
 }
