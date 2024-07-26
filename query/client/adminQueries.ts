@@ -1,6 +1,6 @@
 import { QUERY_KEYS } from "../queryKeys";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { addAreaHead, addDepartmentArea, addDepartmentHead, addDepartmentRegion, addNewArea, addNewRegion, addNewStaff, addRegionalHead, addStaffDocument, addStaffSkill, addStaffToDepartment, changeProfilePic, deleteArea, deleteDepartmentArea, deleteDepartmentRegion, deleteRegion, deleteStaff, deleteStaffDocument, editAreaName, editProfileInfo, editRegionName, getAllAreas, getAllDepartments, getAllRegions, getAllStaffs, getAreaById, getDepartmentById, getDepartmentRegion, getDepartmentStaffs, getOneStaff, getRegionById, getStaffsRegionAndArea, removeStaffSkill, updateStaff, updateStaffStatus } from "./fn/adminFn";
+import { addAreaHead, addDepartmentArea, addDepartmentHead, addDepartmentRegion, addNewArea, addNewRegion, addNewStaff, addRegionalHead, addStaffDocument, addStaffSkill, addStaffToDepartment, changeProfilePic, deleteArea, deleteDepartmentArea, deleteDepartmentRegion, deleteRegion, deleteStaff, deleteStaffDocument, editAreaName, editProfileInfo, editRegionName, getAllAreas, getAllDepartments, getAllRegions, getAllStaffs, getAreaById, getDepartmentById, getDepartmentRegion, getDepartmentStaffs, getOneStaff, getRegionById, getStaffsRegionAndArea, removeDepartmentStaff, removeStaffSkill, updateStaff, updateStaffStatus } from "./fn/adminFn";
 
 export const useGetAllRegions = (adminid: string) => {
     return useQuery({
@@ -387,6 +387,21 @@ export const useUpdatePfp = () => {
         onSuccess: (data: any) => {
             queryClient.invalidateQueries({
                 queryKey: [QUERY_KEYS.GET_USER_BY_ID, data?._id]
+            })
+        }
+    })
+}
+
+export const useRemoveDepartmentStaff = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async ({ depid, staffid }:{ depid: string, staffid: string }) => removeDepartmentStaff(depid, staffid),
+        onSuccess: (data: any) => {
+            queryClient.invalidateQueries({
+                queryKey: [QUERY_KEYS.GET_DEPARTMENT_STAFFS]
+            })
+            queryClient.invalidateQueries({
+                queryKey: [QUERY_KEYS.GET_DEPARTMENT_STAFFS, data?._id]
             })
         }
     })

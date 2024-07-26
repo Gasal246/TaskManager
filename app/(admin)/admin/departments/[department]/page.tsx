@@ -4,7 +4,7 @@ import React from 'react'
 import { motion } from 'framer-motion'
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator, } from "@/components/ui/breadcrumb"
 import AddDepartmentRegion from '@/components/admin/AddDepartmentRegion'
-import { Earth } from 'lucide-react'
+import { Earth, SquareCheckBig, SquareX } from 'lucide-react'
 import { useGetDepartmentById } from '@/query/client/adminQueries'
 import LoaderSpin from '@/components/shared/LoaderSpin'
 import { Avatar, Tooltip } from 'antd'
@@ -31,20 +31,29 @@ const Department = ({ params }: { params: { department: string } }) => {
                         </Breadcrumb>
                         <div className="flex justify-between">
                             <div>
-                                <h1 className='font-bold text-2xl'>{department?.DepartmentName}</h1>
+                                <div className="">
+                                    <h1 className='font-bold text-2xl'>{department?.DepartmentName}</h1>
+                                    <div className="flex gap-3 items-center mb-2">
+                                        {<h4 className={`${department?.AllowProjects ? 'text-green-300' : 'text-red-300'} text-xs font-medium flex items-center gap-1`}>Allowed Projects {department?.AllowProjects ? <SquareCheckBig size={16} /> : <SquareX size={16} />}</h4>}
+                                        {<h4 className={`${department?.AllowTasks ? 'text-green-300' : 'text-red-300'} text-xs font-medium flex items-center gap-1`}>Allowed Tasks {department?.AllowTasks ? <SquareCheckBig size={16} /> : <SquareX size={16} />}</h4>}
+                                    </div>
+                                </div>
                                 <div className="flex gap-1 items-center">
                                     {department?.DepartmentHead && <Avatar src={`${department?.DepartmentHead?.AvatarUrl ? department?.DepartmentHead?.AvatarUrl : '/avatar.png'}`} size={40} />}
                                     {
                                         department?.DepartmentHead ?
                                             <Tooltip title="Department Head" placement='right'>
                                                 <div>
-                                                    <h1 className='text-xs'>{department?.DepartmentHead?.Name}</h1>
-                                                    <h1 className='text-xs'>{department?.DepartmentHead?.Email}</h1>
+                                                    <h1 className='font-medium text-sm leading-3'>{department?.DepartmentHead?.Name}</h1>
+                                                    <h1 className='font-medium text-xs'>{department?.DepartmentHead?.Email}</h1>
                                                 </div>
                                             </Tooltip>
                                             : <h1 className="text-xs text-orange-500">no head added to this department</h1>
                                     }
-
+                                </div>
+                                <div className="flex gap-2 items-center mt-2">
+                                    <h1 className='text-xs font-medium bg-black p-2 rounded-sm'>Max Staffs Allowed: <b className='text-blue-400'>{department?.MaximumStaffs}</b></h1>
+                                    <h1 className='text-xs font-medium bg-black p-2 rounded-sm'>Total Staffs Added: <b className='text-orange-300'>{department?.Staffs?.length}</b></h1>
                                 </div>
                             </div>
                             <div className="flex gap-2">

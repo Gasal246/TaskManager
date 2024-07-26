@@ -136,7 +136,7 @@ export const columns: ColumnDef<IUsers>[] = [
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <Link href={`/admin/staffs/${staff?._id}`}><DropdownMenuItem>View staff</DropdownMenuItem></Link>
-                        <DropdownMenuItem>View payment details</DropdownMenuItem>
+                        {/* <DropdownMenuItem>View payment details</DropdownMenuItem> */}
                     </DropdownMenuContent>
                 </DropdownMenu>
             )

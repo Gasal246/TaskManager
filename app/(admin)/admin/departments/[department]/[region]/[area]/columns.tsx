@@ -8,6 +8,26 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { IUsers } from "@/models/userCollection"
 import { Avatar, Tooltip } from "antd"
 import Link from "next/link"
+import { useRemoveDepartmentStaff } from "@/query/client/adminQueries"
+import { usePathname } from "next/navigation"
+import { toast } from "sonner"
+
+const RemoveStaffButton = ({ staffid }:{ staffid: string }) => {
+    const { mutateAsync: removeStaff, isPending: removingStaff } = useRemoveDepartmentStaff();
+    const pathname = usePathname();
+    const splited = pathname.split('/');
+    const depid = splited[splited.indexOf('departments')+1];
+    const handleRemoveStaff = async () => {
+        const response = await removeStaff({ staffid: staffid, depid: depid });
+        if(response?._id){
+            return toast.success("Successfully removed.")
+        }
+        return toast.error("Some Unexpected Error")
+    }
+    return (
+        <Tooltip title="Remove this staff from area" placement="left"><DropdownMenuItem onClick={handleRemoveStaff}>{removingStaff ? 'Removing...' : 'Remove'}</DropdownMenuItem></Tooltip>
+    )
+}
 
 export const columns: ColumnDef<IUsers>[] = [
     {
@@ -121,8 +141,8 @@ export const columns: ColumnDef<IUsers>[] = [
                             <Tooltip title={staff?.StaffId}>Copy Staff ID</Tooltip>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <Link href={`/admin/staffs/${staff?.StaffId}`}><DropdownMenuItem>View staff</DropdownMenuItem></Link>
-                        <DropdownMenuItem>View payment details</DropdownMenuItem>
+                        <Tooltip title="Click to view staff in detail" placement="left"><Link href={`/admin/staffs/${staff?.StaffId}`}><DropdownMenuItem>View staff</DropdownMenuItem></Link></Tooltip>
+                        <RemoveStaffButton staffid={staff?.StaffId} />
                     </DropdownMenuContent>
                 </DropdownMenu>
             )

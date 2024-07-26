@@ -318,3 +318,11 @@ export async function changeProfilePic( formData: FormData ){
     }
 }
 
+export async function removeDepartmentStaff(depid: string, staffid: string){
+    try {
+        const res = await axios.post('/api/department/remove-staff', { depid, staffid });
+        return res.data;
+    } catch (error) {
+        console.log(error)
+    }
+}
