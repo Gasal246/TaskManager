@@ -19,18 +19,16 @@ const HomeLayout = async ({ children }: {
         redirect('/signin');
     }
     const info = await getAdminInfo(session?.user?.id)
-    if (info) {
+    if (info?._id) {
         return redirect('/superadmin')
     }
-    const response: userTypes[] = await getUserAuth(session?.user?.id);
-    if (response?.includes("admin")) {
+    const response: { Role: userTypes } = await getUserAuth(session?.user?.id);
+    if (response?.Role === 'admin') {
         return redirect('/admin');
     }
     return (
         <div className='w-full h-screen'>
-            <Suspense fallback={<h1>- Gasal satelite connection loading...</h1>}>
-                {children}
-            </Suspense>
+            {children}
         </div>
     )
 }

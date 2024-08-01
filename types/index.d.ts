@@ -1,4 +1,4 @@
-declare type userTypes = 'admin' | 'staff' | 'regional_head' | 'area_head';
+declare type userTypes = 'admin' | 'staff' | 'area-head' | 'dep-head' | 'region-head';
 
 declare type NewDepartment = {
     DepartmentName: string;

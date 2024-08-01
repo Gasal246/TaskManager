@@ -24,4 +24,12 @@ export enum QUERY_KEYS {
 
     // user keys
     GET_USER_BY_ID = "getUserByUserid",
+    GET_TASK_BY_ID = "getTaskByTaskid",
+    GET_NEW_TASKS = "getNewTasksByUserId",
+    GET_ACCEPTED_TASKS = "getAcceptedTasks",
+    GET_CREATED_TASKS = "getForwardedTasks",
+    GET_COMPLETED_TASKS = "getCompletedTasks",
+    GET_COMMENTS_BY_TASKID = "getCommentByTaskId",
+    GET_CHOOSE_STAFFS = "getChooseStaffs",
+    GET_ALL_NOTIFICATIONS = "getNotificationsByUserId"
 }

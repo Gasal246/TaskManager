@@ -1,7 +1,7 @@
 "use client"
 import React from 'react'
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator, } from "@/components/ui/breadcrumb"
-import { Avatar, Tooltip } from 'antd'
+import { Avatar, Popconfirm, Tooltip } from 'antd'
 import { Button } from '@/components/ui/button'
 import { FilePlus2, FileText, Globe2, LandPlot, Plus, SquareX, Trash2 } from 'lucide-react'
 import { motion } from 'framer-motion'
@@ -155,7 +155,7 @@ const StaffPage = ({ params }: { params: { staffid: string } }) => {
                   <h3 className='text-xs font-medium text-slate-400'>Exp: <span className='text-cyan-600'>{formatDateShortly(doc?.ExpireAt)}</span></h3>
                   <h3 className='text-xs font-medium text-slate-400'>Remind: <span className='text-cyan-600'>{formatDateShortly(doc?.RemindAt)}</span></h3>
                   <motion.div whileTap={{ scale: 0.98 }} whileHover={{ scale: 1.05 }} className='absolute top-2 right-2'>
-                    <Tooltip title="Are you sure you have to delete this document ?"><Trash2 size={18} className='hover:text-red-600' onClick={() => handleDeleteDocument(doc?._id)} /></Tooltip>
+                    <Popconfirm title='Delete Document' description='Are you sure about to delete this document ?' cancelText='No' okText='Yes' onConfirm={() => handleDeleteDocument(doc?._id)}><Trash2 size={18} className='hover:text-red-600'/></Popconfirm>
                   </motion.div>
                 </div>
               </Tooltip>

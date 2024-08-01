@@ -7,7 +7,7 @@ import { LandPlot } from 'lucide-react'
 import { useDeleteRegion, useGetAllAreas, useGetRegionById } from '@/query/client/adminQueries'
 import LoaderSpin from '@/components/shared/LoaderSpin'
 import AddRegionalHeadDialog from '@/components/admin/AddRegionalHeadDialog'
-import { Tooltip } from 'antd'
+import { Avatar, Tooltip } from 'antd'
 import EditRegionDialog from '@/components/admin/EditRegionDialog'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger, } from "@/components/ui/alert-dialog"
 import { toast } from 'sonner'
@@ -21,7 +21,7 @@ const RegionPage = ({ params }: { params: { region: string } }) => {
 
     const handleDeleteRegion = async () => {
         const response = await deleteRegion(params?.region);
-        if(response?._id){
+        if (response?._id) {
             router.push('/admin/regions')
             return toast.success("Region Deleted Successfully.")
         }
@@ -43,11 +43,16 @@ const RegionPage = ({ params }: { params: { region: string } }) => {
                     </BreadcrumbItem>
                 </BreadcrumbList>
             </Breadcrumb>
-            <div className="flex justify-between mt-2 items-center flex-wrap mb-3">
+            <div className="flex justify-between mt-2 items-center flex-wrap mb-4">
                 <div className=''>
                     <h1 className='font-bold text-2xl flex gap-1'>Region {regionLoading ? <LoaderSpin size={20} /> : regionData?.RegionName}</h1>
-                    <h2 className='font-medium flex gap-1'>{regionData?.RegionHead?.Name}</h2>
-                    <h2 className='font-medium text-xs flex gap-1'>{regionData?.RegionHead?.Email}</h2>
+                    <div className="flex gap-1 items-center">
+                        <Avatar src={regionData?.RegionHead?.AvatarUrl || '/avatar.png'}/>
+                        <div>
+                            <h2 className='font-medium flex gap-1 leading-4'>{regionData?.RegionHead?.Name}</h2>
+                            <h2 className='font-medium text-xs flex gap-1'>{regionData?.RegionHead?.Email}</h2>
+                        </div>
+                    </div>
                     <h2 className='font-medium text-xs flex gap-1 text-orange-300'>{!regionData?.RegionHead && 'no Head for this region.'}</h2>
                 </div>
                 {regionData && <div className="flex gap-1 flex-wrap">

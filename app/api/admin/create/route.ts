@@ -20,9 +20,9 @@ export async function POST(req: NextRequest){
         const newAdminUser = new Users({
             Email: data?.email,
             Name: data?.name,
-            IsAdmin: true,
             Addedby: session?.user?.id,
-            Status: 'active'
+            Status: 'active',
+            Role: 'admin'
         })
         const adminUser = await newAdminUser.save();
         const newDepartments = data?.departments?.map((dep: NewDepartment) => {

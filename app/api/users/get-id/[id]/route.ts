@@ -6,7 +6,7 @@ connectDB();
 
 export async function GET(req: NextRequest, { params }:{ params: { id: string }}){
     try {
-        console.log(params?.id)
+        // console.log(params?.id)
         const user = await Users.findById(params?.id, { Password: 0 });
         return Response.json(user);
     } catch (error) {

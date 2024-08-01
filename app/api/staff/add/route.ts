@@ -85,7 +85,8 @@ export async function POST(req: NextRequest) {
             Status: 'unverified',
             InitialEntry: true,
             Addedby: session?.user?.id,
-            Documents: documents
+            Documents: documents,
+            Role: 'staff'
         });
         const savedUser = await newUser.save();
         return Response.json(savedUser);

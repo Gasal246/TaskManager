@@ -4,21 +4,18 @@ import { NextRequest, NextResponse } from "next/server";
 
 connectDB();
 
-export async function GET(req: NextRequest){
+export async function GET(req: NextRequest) {
     try {
         const { searchParams } = new URL(req.url);
         const userid = searchParams.get('id');
-        const user = await Users.findById(userid);
-        if(!user){
-            throw new Error(`User not found for id: ${userid}`); 
+        const user = await Users.findById(userid, { Role: 1 });
+        if (!user) {
+            throw new Error(`User not found for id: ${userid}`);
         }
-        const roles: userTypes[] = [];
-        if (user?.IsAdmin) roles.push('admin');
-        if (roles.length === 0) roles.push('staff');
-        return Response.json(roles);
+        return Response.json({ Role: user?.Role });
     } catch (error) {
         console.log(error)
-        return new NextResponse("Internal Server Error: "+ error, { status: 500 });
+        return new NextResponse("Internal Server Error: " + error, { status: 500 });
     }
 }
 

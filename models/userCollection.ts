@@ -5,7 +5,6 @@ export interface IUsers extends Document {
   Email: String;
   Password: String;
   Name: String;
-  IsAdmin: Boolean | null;
   Documents: {
      DocName: String | null;
      DocUrl: String | null;
@@ -23,13 +22,13 @@ export interface IUsers extends Document {
   AvatarUrl: String | null;
   Status: String | null;
   IsDeleted: Boolean;
+  Role: 'admin' | 'staff' | 'area-head' | 'dep-head' | 'region-head';
 }
 
 const UsersSchema: Schema = new Schema({
   Email: { type: String, required: true, unique: true },
   Name: { type: String, required: true },
   Password: { type: String },
-  IsAdmin: { type: Boolean },
   Documents: [{
      DocName: { type: String },
      DocUrl: { type: String },
@@ -38,15 +37,14 @@ const UsersSchema: Schema = new Schema({
   }],
   Skills: [{ type: String,  }],
   Addedby: { type: Schema.Types.ObjectId },
-  IsRegionalHead: { type: Boolean },
-  IsAreaHead: { type: Boolean },
   InitialEntry: { type: Boolean, default: true },
   VerifyCode: { type: String },
   AvatarUrl: { type: String },
   Status: { type: String, enum: ['active', 'blocked', 'unverified']},
   Region: { type: Schema.Types.ObjectId, ref: "Regions" },
   Area: { type: Schema.Types.ObjectId, ref: "Areas" },
-  IsDeleted: { type: Boolean, default: false }
+  IsDeleted: { type: Boolean, default: false },
+  Role: { type: String, enum: ['admin', 'staff', 'area-head', 'dep-head', 'region-head']}
 }, { timestamps: true });
 
 const Users = mongoose.models?.Users || mongoose.model<IUsers>('Users', UsersSchema);

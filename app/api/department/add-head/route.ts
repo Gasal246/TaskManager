@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { authOptions } from "../../auth/[...nextauth]/route";
 import Departments from "@/models/departmentsCollection";
+import Users from "@/models/userCollection";
 
 connectDB();
 
@@ -13,6 +14,7 @@ export async function POST(req: NextRequest){
             return new NextResponse("Not Authorised Request", { status: 400 })
         }
         const { depid, staffid } = await req.json();
+        const updatedUser = await Users.findByIdAndUpdate(staffid, { Role: 'dep-head'});
         const updatedDep = await Departments.findByIdAndUpdate(depid, { DepartmentHead: staffid });
         return Response.json(updatedDep);
     } catch (error) {

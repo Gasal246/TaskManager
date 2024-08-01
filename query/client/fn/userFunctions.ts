@@ -45,3 +45,130 @@ export async function findUserById(id: string){
     }
 }
 
+// TASKS OF STAFF
+
+export async function getTaskById(taskid: string){
+    try {
+        const res = await axios.get(`/api/task/get-id/${taskid}`);
+        return res.data;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export async function getNewTasks(userid: string){
+    try {
+        const res = await axios.get(`/api/task/get-new-tasks/${userid}`);
+        return res.data;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export async function getAcceptedTasks(userid: string){
+    try {
+        const res = await axios.get(`/api/task/get-accepted-tasks/${userid}`);
+        return res.data;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export async function getCreatedTasks(userid: string){
+    try {
+        const res = await axios.get(`/api/task/get-created-tasks/${userid}`);
+        return res.data;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export async function getCompletedTasks(userid: string){
+    try {
+        const res = await axios.get(`/api/task/get-completed-tasks/${userid}`);
+        return res.data;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export async function addNewTask(formData: FormData){
+    try {
+        const res = await axios.post('/api/task/add-task', formData );
+        return res.data;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export async function editTask(formData: FormData){
+    try {
+        const res = await axios.post('/api/task/edit-task', formData );
+        return res.data;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export async function deleteTask(taskid: string){
+    try {
+        const res = await axios.post('/api/task/delete-task', { taskid });
+        return res.data;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export async function getTaskComments(taskid: string){
+    try {
+        const res = await axios.get(`/api/task/get-comments/${taskid}`);
+        return res.data;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export async function addTaskComment(formData: FormData){
+    try {
+        const res = await axios.post('/api/task/add-comment', formData );
+        return res.data;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export async function removeTaskComment(taskid: string, commentid: string){
+    try {
+        const res = await axios.post('/api/task/remove-comment', { taskid, commentid });
+        return res.data;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export async function getChoosableStaffs(userid: string){
+    try {
+        const res = await axios.get(`/api/staff/choosable-staffs/${userid}`);
+        return res.data;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export async function getAllNotifications(userid: string){
+    try {
+        const res = await axios.get(`/api/notifications/get-all/${userid}`);
+        return res.data;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export async function notificationInview (notificationid: string){
+    try {
+        const res = await axios.get(`/api/notifications/inview/${notificationid}`);
+        return res.data;
+    } catch (error) {
+        console.log(error);
+    }
+}
