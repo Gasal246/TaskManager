@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { Avatar, Tooltip } from 'antd';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import Link from 'next/link';
+import AddProjectDialog from '@/components/staff/AddProjectDialog';
 
 const ProjectsPage = () => {
   return (
@@ -15,7 +16,9 @@ const ProjectsPage = () => {
         <Popover>
           <PopoverTrigger><Tooltip title="Project Actions"><Menu /></Tooltip></PopoverTrigger>
           <PopoverContent className='w-[120px] p-1 space-y-1'>
-            <motion.button whileTap={{ scale: 0.98 }} className='w-full bg-slate-600 hover:bg-slate-700 rounded-sm p-1 text-sm flex gap-1 items-center justify-center'> Add Project </motion.button>
+            <AddProjectDialog trigger={
+              <motion.h1 whileTap={{ scale: 0.98 }} className='w-full bg-slate-700 hover:bg-slate-800 rounded-sm p-1 text-sm flex gap-1 items-center justify-center cursor-pointer'> Create Project </motion.h1>
+            } />
           </PopoverContent>
         </Popover>
       </div>
@@ -30,8 +33,8 @@ const ProjectsPage = () => {
         <TabsContent value="new">New Projects here.</TabsContent>
         <TabsContent value="ongoing" className='w-full'>
           <div className="flex flex-wrap">
-            <Link href={`/staff/projects/1234`}>
-              <div className="w-full lg:w-3/12 p-1">
+            <div className="w-full lg:w-3/12 p-1">
+              <Link href={`/staff/projects/1234`}>
                 <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }} className="bg-slate-900 border border-slate-700 p-2 rounded-md shadow-md">
                   <h2 className='font-medium mb-1'>Project Name</h2>
                   <Tooltip title="Project Creator" placement='topLeft'>
@@ -49,8 +52,8 @@ const ProjectsPage = () => {
                     <h3 className='px-3 p-1 bg-slate-800 rounded-full text-xs'>aprooved</h3>
                   </div>
                 </motion.div>
-              </div>
-            </Link>
+              </Link>
+            </div>
           </div>
         </TabsContent>
         <TabsContent value="owned">The Projects You Owned here.</TabsContent>

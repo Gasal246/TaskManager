@@ -9,6 +9,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import LoaderSpin from '@/components/shared/LoaderSpin';
 import Link from 'next/link';
+import ChangeAccessDocumentDialog from '@/components/staff/ChangeAccessDocumentDialog';
+import AddProjectDocDialog from '@/components/staff/AddProjectDocDialog';
 
 const ProjectPage = ({ params }: { params: { projectid: string } }) => {
   return (
@@ -33,9 +35,10 @@ const ProjectPage = ({ params }: { params: { projectid: string } }) => {
           <Popover>
             <PopoverTrigger><Tooltip title="Project Actions"><Menu className='hover:text-slate-400 cursor-pointer' /></Tooltip></PopoverTrigger>
             <PopoverContent className='w-[120px] p-1 space-y-1'>
-              <motion.button whileTap={{ scale: 0.98 }} className='w-full bg-green-600 hover:bg-green-700 rounded-sm p-1 text-sm flex gap-1 items-center justify-center'> Complete & Forward </motion.button>
+              <motion.button whileTap={{ scale: 0.98 }} className='w-full bg-orange-600 hover:bg-orange-700 rounded-sm p-1 text-sm flex gap-1 items-center justify-center'> Add Flow </motion.button>
+              <motion.button whileTap={{ scale: 0.98 }} className='w-full bg-green-600 hover:bg-green-700 rounded-sm p-1 text-sm flex gap-1 items-center justify-center'> Project Completed </motion.button>
               <motion.button whileTap={{ scale: 0.98 }} className='w-full bg-slate-600 hover:bg-slate-700 rounded-sm p-1 text-sm flex gap-1 items-center justify-center'> Edit Project </motion.button>
-              <motion.button whileTap={{ scale: 0.98 }} className='w-full bg-red-600 hover:bg-red-700 rounded-sm p-1 text-sm flex gap-1 items-center justify-center'> Delete Project </motion.button>
+              <Popconfirm title="Delete Project ?" description="Are you sure you want to delete this project ?"><motion.button whileTap={{ scale: 0.98 }} className='w-full bg-red-600 hover:bg-red-700 rounded-sm p-1 text-sm flex gap-1 items-center justify-center'> Delete Project </motion.button></ Popconfirm>
             </PopoverContent>
           </Popover>
           <Link href="#project-comments"><Tooltip title="View Comments"><MessageSquareMore className='hover:text-slate-400 cursor-pointer' /></Tooltip></Link>
@@ -101,7 +104,9 @@ const ProjectPage = ({ params }: { params: { projectid: string } }) => {
                   <Popover>
                     <PopoverTrigger><Tooltip title="Document Actions"><Menu size={18} className='hover:text-cyan-600' /></Tooltip></PopoverTrigger>
                     <PopoverContent className='w-[120px] p-1 space-y-1'>
-                      <motion.button whileTap={{ scale: 0.98 }} className='w-full bg-slate-600 hover:bg-slate-700 rounded-sm p-1 text-sm flex gap-1 items-center justify-center'> Change Access </motion.button>
+                      <ChangeAccessDocumentDialog trigger={
+                        <motion.h1 whileTap={{ scale: 0.98 }} className='w-full bg-slate-600 hover:bg-slate-700 rounded-sm p-1 text-sm flex gap-1 items-center justify-center'> Change Access </motion.h1>
+                      } />
                       <Popconfirm title="Remove Document ?" description="Are you sure about removing this document?" okText="Yes" cancelText="No"><motion.button whileTap={{ scale: 0.98 }} className='w-full bg-slate-600 hover:bg-slate-700 rounded-sm p-1 text-sm flex gap-1 items-center justify-center'> Remove File </motion.button></Popconfirm>
                     </PopoverContent>
                   </Popover>
@@ -111,7 +116,9 @@ const ProjectPage = ({ params }: { params: { projectid: string } }) => {
           </div>
           <div className="w-full md:w-2/12 p-1">
             <div className="bg-slate-300 p-2 rounded-md">
-              <motion.h1 whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }} className='cursor-pointer bg-white text-black text-sm px-3 p-1 rounded-full flex font-bold gap-1'>Add Document <FilePlus2 size={18} /></motion.h1>
+              <AddProjectDocDialog trigger={
+                <motion.h1 whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }} className='cursor-pointer bg-white text-black text-sm px-3 p-1 rounded-full flex font-bold gap-1'>Add Document <FilePlus2 size={18} /></motion.h1>
+              } />
             </div>
           </div>
         </div>
@@ -124,6 +131,7 @@ const ProjectPage = ({ params }: { params: { projectid: string } }) => {
               <div className="flex gap-1 items-center">
                 <Avatar src="/avatar.png" size={20} />
                 <h3 className="text-xs font-semibold text-slate-300 leading-3">gasal123@gmail.com</h3>
+                <Popconfirm title="Delete Comment ?" description="Are you sure you wanna delete this comment ?"><motion.h1 className='cursor-pointer flex justify-center items-center gap-1 text-xs font-medium text-red-700' whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }}>Delete <Trash2 size={14} /></motion.h1></Popconfirm>
               </div>
               <p className='text-xs text-slate-300 pl-5'>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Pariatur eligendi unde laudantium quos aliquam saepe, quidem dolor ut rem reprehenderit nam expedita itaque voluptatum, deserunt non quisquam quasi aliquid iste? <i className='text-slate-400 text-xs text-nowrap'>. just now</i></p>
             </div>
@@ -135,7 +143,7 @@ const ProjectPage = ({ params }: { params: { projectid: string } }) => {
           </Space.Compact>
         </div>
         <div className="w-full lg:w-1/2 p-2" id='project-flow'>
-          <h1 className='text-sm font-semibold text-center'>Project Work Flow</h1>
+          <h1 className='text-sm font-semibold text-center'>Project Working Tree</h1>
           <div className='py-4'>
             <ConfigProvider
               theme={{

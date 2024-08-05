@@ -7,14 +7,23 @@ import Users from "@/models/userCollection";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { authOptions } from "../../auth/[...nextauth]/route";
+import { promises as fs } from 'fs';
+import path from "path";
 
 connectDB();
 
-export async function POST(req: NextRequest){
+export async function POST(req: NextRequest) {
     try {
         const session = await getServerSession(authOptions);
-        if(!session) return new NextResponse("Un-Authorised Server Request.", { status: 404 });
+        if (!session) return new NextResponse("Un-Authorised Server Request.", { status: 404 });
         const { adminid } = await req.json();
+        const adminData = await Admindatas.findById(adminid);
+        await adminData?.Documents?.map(async (doc: any) => {
+            const filePath = path.join(process.cwd(), 'public', doc?.DocUrl);
+            await fs.unlink(filePath).catch((err) => {
+                console.log(err)
+            });
+        })
         const deletedAdmin = await Admindatas.findByIdAndDelete(adminid);
         if (!deletedAdmin) {
             return new NextResponse("Admin not found.", { status: 404 });

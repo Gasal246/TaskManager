@@ -2,6 +2,7 @@ export enum QUERY_KEYS {
     // super admin keys
     GET_SUPER_ADMIN_BY_ID = "getSuperAdminById",
     GET_ADMINS = "getSuperAdminById",
+    GET_DEMO_DEPARTMENTS = "getDemoDepartments",
     GET_ADMIN_WITHIN = "getAdminsWithin",
     GET_ADMIN_ADMINID = "getAdminByAdminId",
     GET_DEPARTMENT_ID = "getDepartmentById",

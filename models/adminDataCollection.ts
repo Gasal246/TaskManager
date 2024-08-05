@@ -13,6 +13,12 @@ const AdmindatasSchema: Schema = new Schema({
   Departments: [{ type: Schema.ObjectId, ref: "Departments" }],
   Regions: [{ type: String,  }],
   Areas: [{ type: String,  }],
+  Documents: [{
+    DocName: { type: String },
+    ExpireAt: { type: Date },
+    RemindAt: { type: Date },
+    DocUrl: { type: String }
+  }]
 }, { timestamps: true });
 
 const Admindatas = mongoose.models?.Admindatas || mongoose.model<IAdmindatas>('Admindatas', AdmindatasSchema);

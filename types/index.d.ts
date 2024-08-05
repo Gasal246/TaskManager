@@ -10,7 +10,8 @@ declare type NewDepartment = {
 declare type NewAdminType = {
     name: string;
     email: string;
-    departments: NewDepartment[] | []
+    departments: string,
+    [key: string]: any;
 }
 
 declare type AdminDataFilters = 'today' | 'month' | 'all' | 'days'

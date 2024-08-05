@@ -1,11 +1,13 @@
 import connectDB from "@/lib/mongo"
 import Departments from "@/models/departmentsCollection";
+import Regions from "@/models/regionCollection";
 import { NextRequest, NextResponse } from "next/server";
 
 connectDB();
 
 export async function GET(req: NextRequest, { params }:{ params: { id: string }}) {
     try {
+        const awakeRegions = await Regions.find({}).limit(1);
         const department = await Departments.findById(params?.id)
             .populate({
                 path: "DepartmentHead",

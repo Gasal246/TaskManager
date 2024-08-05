@@ -14,7 +14,7 @@ import { toast } from 'sonner';
 
 const formSchema = z.object({
     DepartmentName: z.string().min(2).max(50),
-    MaximumStaffs: z.string().min(1),
+    MaximumStaffs: z.string(),
     AllowProjects: z.boolean(),
     AllowTasks: z.boolean()
 })
@@ -52,7 +52,6 @@ const EditDepartmentDialog = ({ trigger, departmentId }: { trigger: React.ReactN
         })
         if (response?._id) {
             return toast.success("Department Successfully Edited.");
-            
         }
         return toast.error("Something wrong happened", {
             description: "please try again"
@@ -93,7 +92,7 @@ const EditDepartmentDialog = ({ trigger, departmentId }: { trigger: React.ReactN
                                     <FormItem>
                                         <FormLabel>Number Of Staffs</FormLabel>
                                         <FormControl>
-                                            <Input type='number' placeholder="Staffs Allowed" {...field} />
+                                            <Input type='number' placeholder="Staffs Allowed" {...field} onChange={(e) => form.setValue('MaximumStaffs', e.target.value+'')} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>

@@ -10,12 +10,57 @@ export async function getSuperUserById(id: string){
     }
 }
 
-export async function addNewAdmin(data: NewAdminType) {
+export async function addNewAdmin(data: FormData) {
     try {
         const res = await axios.post('/api/admin/create', data);
         return res.data;
     } catch (error) {
         console.log(error)
+    }
+}
+
+export async function addDemoDep(data: FormData){
+    try {
+        const res = await axios.post('/api/superadmin/add-demo-dep', data);
+        return res.data;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export async function getDemoDeparments(){
+    try {
+        const res = await axios.get('/api/superadmin/get-demo-deps');
+        return res.data;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export async function deleteDemoDepartment(departmentid: string){
+    try {
+        const res = await axios.post('/api/department/delete', { departmentid });
+        return res.data;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export async function deleteAdminDoc(formData: FormData){
+    try {
+        const res = await axios.post('/api/superadmin/delete-admin-doc', formData );
+        return res.data;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export async function deleteAdminDep(formData: FormData){
+    try {
+        const res = await axios.post('/api/admin/delete-dep', formData );
+        return res.data;
+    } catch (error) {
+        console.log(error);
     }
 }
 

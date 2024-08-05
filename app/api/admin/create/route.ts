@@ -9,14 +9,15 @@ import Departments from "@/models/departmentsCollection";
 
 connectDB();
 
-export async function POST(req: NextRequest){
+export async function POST(req: NextRequest) {
     try {
         const session: any = await getServerSession(authOptions)
-        const data: NewAdminType = await req.json();
         const superadmin = await Superadmin.findById(session?.user?.id);
-        if(!superadmin){
+        if (!superadmin) {
             return new NextResponse("Authorization Error: Not A Super Admin", { status: 500 });
         }
+        const formdata = await req.formData();
+        const data = Object.fromEntries(formdata) as NewAdminType;
         const newAdminUser = new Users({
             Email: data?.email,
             Name: data?.name,
@@ -25,18 +26,20 @@ export async function POST(req: NextRequest){
             Role: 'admin'
         })
         const adminUser = await newAdminUser.save();
-        const newDepartments = data?.departments?.map((dep: NewDepartment) => {
-            return new Departments({
+        const depIds = data?.departments.split(',');
+        const demoDepartments = await Departments.find({ _id: { $in: depIds } });
+        const departmentIds: string[] = [];
+        for (const demodep of demoDepartments) {
+            const newDep = new Departments({
                 AdminId: adminUser?._id,
-                DepartmentName: dep?.DepartmentName,
-                AllowProjects: dep?.Allow_project,
-                AllowTasks: dep?.Allow_tasks,
-                MaximumStaffs: dep?.Max_staff_count
+                DepartmentName: demodep?.DepartmentName,
+                MaximumStaffs: demodep?.MaximumStaffs,
+                AllowProjects: demodep?.AllowProjects,
+                AllowTasks: demodep?.AllowTasks,
             })
-        })
-        const departmentsToSave = newDepartments?.map((dep: any) => dep.save());
-        const savedDepartments = await Promise.all(departmentsToSave)
-        const departmentIds = savedDepartments.map(dep => dep._id);
+            const savedDep = await newDep.save();
+            departmentIds.push(savedDep?._id.toString())
+        }
         const newAdminData = new Admindatas({
             AdminId: adminUser?._id,
             Departments: departmentIds

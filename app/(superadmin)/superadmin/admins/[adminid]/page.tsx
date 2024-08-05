@@ -1,14 +1,14 @@
 "use client"
 import { Button } from '@/components/ui/button'
-import { useChangeAdminStatus, useDeleteAdmin, useFindAdminByAdminId } from '@/query/client/superuserQueries'
-import { Avatar, Tooltip } from 'antd'
+import { useChangeAdminStatus, useDeleteAdmin, useDeleteAdminDep, useDeleteAdminDoc, useFindAdminByAdminId } from '@/query/client/superuserQueries'
+import { Avatar, Popconfirm, Tooltip } from 'antd'
 import React from 'react'
 import { Popover, PopoverContent, PopoverTrigger, } from "@/components/ui/popover"
 import { DotsHorizontalIcon, TrashIcon } from '@radix-ui/react-icons'
 import Link from 'next/link'
 import { Badge } from "@/components/ui/badge"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuTrigger, } from "@/components/ui/dropdown-menu"
-import { CircleCheckBig, MapPinned, OctagonX, PencilRuler, Trash2Icon, Users } from 'lucide-react'
+import { CircleCheckBig, FilePlus2, MapPinned, OctagonX, PencilRuler, Trash2, Trash2Icon, Users } from 'lucide-react'
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
@@ -18,12 +18,16 @@ import { motion } from 'framer-motion'
 import EditDepartmentDialog from '@/components/super/EditDepartmentDialog'
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator, } from "@/components/ui/breadcrumb"
 import EditAdminDialog from '@/components/super/EditAdminDialog'
+import { formatDateTiny } from '@/lib/utils'
+import AddAdminDocumentsDialog from '@/components/super/AddAdminDocumentsDialog'
 
 const AdminPage = ({ params }: { params: { adminid: string } }) => {
   const router = useRouter();
   const { data: adminData, isLoading: adminDataLoading } = useFindAdminByAdminId(params.adminid);
   const { mutateAsync: changeAdminStatus, isPending: changingAdminStatus } = useChangeAdminStatus();
-  const { mutateAsync: deleteAdmin, isPending: deletingAdmin } = useDeleteAdmin()
+  const { mutateAsync: deleteAdmin, isPending: deletingAdmin } = useDeleteAdmin();
+  const { mutateAsync: deleteAdminDoc, isPending:deletingAdminDoc } = useDeleteAdminDoc();
+  const { mutateAsync: deleteAdminDep, isPending:deletingAdminDep } = useDeleteAdminDep();
 
   const handleStatusChange = async (value: any) => {
     const response = await changeAdminStatus({ adminid: params.adminid, status: value });
@@ -36,6 +40,28 @@ const AdminPage = ({ params }: { params: { adminid: string } }) => {
       return toast.success("Complete Admin Data Erased...")
     } else {
       return toast.error("Delete failed some steps.")
+    }
+  }
+
+  const handleDeleteDocument = async (docId: string, docUrl: string) => {
+    const formData = new FormData();
+    formData.append('adminId', adminData?._id);
+    formData.append('docId', docId);
+    formData.append('docUrl', docUrl);
+    const response = await deleteAdminDoc(formData);
+    console.log(response);
+    if (response?._id) {
+      return toast.success('Admin Document Deleted.')
+    }
+  }
+
+  const handleDeleteDeparment = async (depid: string) => {
+    const formData = new FormData();
+    formData.append('depId', depid);
+    formData.append('adminId', adminData?._id);
+    const response = await deleteAdminDep(formData);
+    if(response?._id){
+      return toast.success("Department Successfully Deleted.")
     }
   }
 
@@ -101,7 +127,7 @@ const AdminPage = ({ params }: { params: { adminid: string } }) => {
           </Popover>
         </div>
       </div>
-      <div className="flex flex-wrap mt-5">
+      <div className="flex flex-wrap mt-5 mb-2">
         {
           adminData?.Departments?.map((department: any) => (
             <div className="w-3/12 p-1" key={department?._id}>
@@ -118,11 +144,42 @@ const AdminPage = ({ params }: { params: { adminid: string } }) => {
                 <div className="flex justify-end space-x-2 mr-1">
                   <Tooltip title={`${department?.Staffs?.length} staffs`}><li className='text-xs flex gap-1 text-slate-400'><Users size={14} /> {department?.Staffs?.length},</li></Tooltip>
                   <Tooltip title={`${department?.Regions?.length} regions`}><li className='text-xs flex gap-1 text-slate-400'><MapPinned size={14} /> {department?.Regions?.length}</li></Tooltip>
+                  <Popconfirm title="Delete Department ?" description="Are you sure want to delete this department?" onConfirm={() => handleDeleteDeparment(department?._id)}>
+                    <h3 className='text-xs text-red-600 underline'>Delete?</h3>
+                  </Popconfirm>
                 </div>
               </motion.div>
             </div>
           ))
         }
+      </div>
+      <h4 className='font-medium'>Documents</h4>
+      <div className="flex flex-wrap items-center">
+        {adminData?.Documents?.map((doc: any) => (
+          <div className="w-full lg:w-3/12 p-1" key={doc?._id}>
+            <div className="bg-slate-900 border border-slate-600 p-2 w-full rounded-md">
+              <div className="flex justify-between items-center">
+                <h1 className="text-sm font-medium">{doc?.DocName}</h1>
+                <Popconfirm title="Delete Document" description="Are you sure want to delete this company document ?" onConfirm={() => handleDeleteDocument(doc?._id, doc?.DocUrl)}><motion.div whileHover={{ rotate: -30, scale: 1.05 }} whileTap={{ scale: 0.98 }} className="text-red-700"><Trash2 size={20} /></motion.div></Popconfirm>
+              </div>
+              <div className="flex justify-between mt-1 items-center">
+                <div>
+                  <h4 className="text-xs text-slate-400 leading-3">expire at</h4>
+                  <h2 className="text-xs font-medium text-slate-300">{formatDateTiny(doc?.ExpireAt)}</h2>
+                </div>
+                <div>
+                  <h4 className="text-xs text-slate-400 leading-3">remind at</h4>
+                  <h2 className="text-xs font-medium text-slate-300">{formatDateTiny(doc?.RemindAt)}</h2>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+        <div className="w-full md:w-3/12 p-2">
+          <AddAdminDocumentsDialog trigger={
+            <motion.h1 whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }} className="cursor-pointer bg-cyan-700 border border-slate-600 p-2 flex gap-2 items-center text-sm font-semibold text-black justify-center rounded-full">Add Document <FilePlus2 /></motion.h1>
+          } adminId={adminData?.AdminId?._id} />
+        </div>
       </div>
     </div>
   )

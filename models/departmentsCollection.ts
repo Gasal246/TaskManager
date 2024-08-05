@@ -10,10 +10,12 @@ export interface IDepartments extends Document {
   AllowProjects: Boolean;
   AllowTasks: Boolean;
   MaximumStaffs: Number;
+  IsDemo: Boolean | null;
+  IsDeleted: Boolean | null;
 }
 
 const DepartmentsSchema: Schema = new Schema({
-  AdminId: { type: Schema.Types.ObjectId, required: true, ref: "Users" },
+  AdminId: { type: Schema.Types.ObjectId, ref: "Users" },
   DepartmentName: { type: String, required: true },
   DepartmentHead: { type: Schema.Types.ObjectId, ref: "Users" },
   Staffs: [{
@@ -30,6 +32,8 @@ const DepartmentsSchema: Schema = new Schema({
   AllowProjects: { type: Boolean, required: true },
   AllowTasks: { type: Boolean, required: true },
   MaximumStaffs: { type: Number, required: true },
+  IsDemo: { type: Boolean },
+  IsDeleted: { type: Boolean }
 }, { timestamps: true });
 
 const Departments = mongoose?.models?.Departments || mongoose.model<IDepartments>('Departments', DepartmentsSchema);
