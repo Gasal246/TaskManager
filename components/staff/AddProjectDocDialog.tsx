@@ -9,7 +9,10 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Switch } from "@/components/ui/switch"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from '../ui/input'
-import { Avatar, Tooltip } from 'antd'
+import { Avatar, Tooltip, Upload, UploadProps } from 'antd'
+import { toast } from 'sonner'
+import { useQueryClient } from '@tanstack/react-query'
+import { CloudUpload } from 'lucide-react'
 
 const items = [
     {
@@ -46,7 +49,7 @@ const formSchema = z.object({
     }),
 })
 
-const AddProjectDocDialog = ({ trigger }: { trigger: React.ReactNode }) => {
+const AddProjectDocDialog = ({ trigger, projectId }: { trigger: React.ReactNode, projectId: string }) => {
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -59,6 +62,32 @@ const AddProjectDocDialog = ({ trigger }: { trigger: React.ReactNode }) => {
     function onSubmit(values: z.infer<typeof formSchema>) {
         console.log(values)
     }
+
+    const queryClient = useQueryClient();
+
+    const props: UploadProps = {
+        name: 'file',
+        action: '/api/admin/add-project-doc',
+        method: 'POST',
+        headers: {
+            ContentType: 'multipart/form-data'
+        },
+        data: { docname: form.getValues('DocName'), projectId: projectId },
+        onChange(info) {
+            if (info.file.status !== 'uploading') {
+                console.log(info.file, info.fileList);
+            }
+            if (info.file.status === 'done') {
+                toast.success(`${info.file.name} file uploaded successfully`);
+                queryClient.invalidateQueries({
+
+                })
+            } else if (info.file.status === 'error') {
+                toast.error(`${info.file.name} file upload failed.`);
+            }
+        },
+    };
+
     return (
         <Dialog>
             <DialogTrigger>{trigger}</DialogTrigger>
@@ -82,6 +111,9 @@ const AddProjectDocDialog = ({ trigger }: { trigger: React.ReactNode }) => {
                                 </FormItem>
                             )}
                         />
+                        <div className="max-w-[350px]">
+                            <Upload {...props}><Button className='flex gap-2 items-center' >Click to Upload <CloudUpload size={20} /></Button></Upload>
+                        </div>
                         <FormField
                             control={form.control}
                             name="Private"

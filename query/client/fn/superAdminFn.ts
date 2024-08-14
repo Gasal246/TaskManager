@@ -144,3 +144,21 @@ export async function editAdmin(adminId: string, name: string, email: string){
         console.log(error)
     }
 }
+
+export async function getAllAdminUsers(adminId: string){
+    try {
+        const res = await axios.get(`/api/superadmin/get-admin-users/${adminId}`);
+        return res.data;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export async function addMoreDep(formData: FormData){
+    try {
+        const res = await axios.post(`/api/admin/add-dep`, formData);
+        return res.data;
+    } catch (error) {
+        console.log(error);
+    }
+}

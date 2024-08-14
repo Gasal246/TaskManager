@@ -67,3 +67,43 @@ export const multiFormatDateString = (timestamp: string = ""): string => {
       return "Just now";
   }
 };
+
+export function formatNumber(number: number) {
+  let formattedNumber;
+  
+  if (number >= 1_00_00_000) {
+      // Crores
+      formattedNumber = number / 1_00_00_000;
+      return addSuffix(formattedNumber, 'Cr');
+  } else if (number >= 10_00_000) {
+      // Millions
+      formattedNumber = number / 10_00_000;
+      return addSuffix(formattedNumber, 'M');
+  } else if (number >= 1_00_000) {
+      // Lakhs
+      formattedNumber = number / 1_00_000;
+      return addSuffix(formattedNumber, 'L');
+  } else if (number >= 1_000) {
+      // Thousands
+      formattedNumber = number / 1_000;
+      return addSuffix(formattedNumber, 'K');
+  } else {
+      // Less than a thousand
+      return number.toString();
+  }
+}
+
+function addSuffix(value: number, suffix: string) {
+  // Check if the number has a decimal part other than .0
+  if (value % 1 === 0) {
+      return value.toString() + suffix;
+  } else {
+      return value.toFixed(1) + suffix;
+  }
+}
+
+export function calculatePercentage(outof: number, total: number): number {
+  if (outof === 0) return 0;
+  let percentage = (total / outof) * 100;
+  return percentage % 1 === 0 ? parseFloat(percentage.toFixed(0)) : parseFloat(percentage.toFixed(2));
+}

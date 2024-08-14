@@ -1,20 +1,31 @@
 "use client"
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Popover, PopoverContent, PopoverTrigger, } from "@/components/ui/popover"
 import Image from 'next/image'
-import { CircleUser } from 'lucide-react'
+import { Bell, CircleUser } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { ExitIcon } from '@radix-ui/react-icons'
 import { signOut, useSession } from 'next-auth/react'
-import { useFindUserById } from '@/query/client/userQueries'
-import { Avatar } from 'antd'
+import { useFindUserById, useGetAllNotifications } from '@/query/client/userQueries'
+import { Avatar, Badge, Tooltip } from 'antd'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger, } from "@/components/ui/alert-dialog"
 import { useRouter } from 'next/navigation'
+import NotificationPane from '../shared/NotificationPane'
 
 const AdminTopbar = () => {
     const router = useRouter();
     const { data: session }: any = useSession();
     const { data: currentUser, isLoading: currentUserDataLoading } = useFindUserById(session?.user?.id);
+    const { data: notifications, isLoading: notificationsLoading } = useGetAllNotifications(session?.user?.id);
+    const [newNotifications, setNewNotifications] = useState(0);
+    useEffect(() => {
+        if (notifications) {
+            const newest = notifications?.filter((notification: any) => notification?.IsOpened == false);
+            setNewNotifications(newest?.length);
+        } else {
+            setNewNotifications(0);
+        }
+    }, [notifications])
     return (
         <div className='w-full h-14 dark:bg-slate-900 bg-slate-400 px-10 flex items-center'>
             <div className="flex items-center justify-center gap-2">
@@ -22,6 +33,15 @@ const AdminTopbar = () => {
                 <h1 className='font-bold text-nowrap'>Task Manager</h1>
             </div>
             <div className="w-full flex justify-end">
+                <NotificationPane trigger={
+                    <div className='pt-2 cursor-pointer'>
+                        <Tooltip title={newNotifications <= 0 ? 'no new notifications.' : `${newNotifications} new notifications`}>
+                            <Badge count={newNotifications} size='small'>
+                                <Bell className='text-primary' size={20} />
+                            </Badge>
+                        </Tooltip>
+                    </div>
+                } />
                 {
                     currentUser &&
                     <Popover>

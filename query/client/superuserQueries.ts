@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { addDemoDep, addNewAdmin, changeAdminStatus, deleteAdminData, deleteAdminDep, deleteAdminDoc, deleteDemoDepartment, editAdmin, editDepartment, findAdminByAdminid, getAdmins, getAdminsWithin, getDemoDeparments, getDepartmentById, getSuperUserById, searchAdmins } from "./fn/superAdminFn";
+import { addDemoDep, addMoreDep, addNewAdmin, changeAdminStatus, deleteAdminData, deleteAdminDep, deleteAdminDoc, deleteDemoDepartment, editAdmin, editDepartment, findAdminByAdminid, getAdmins, getAdminsWithin, getAllAdminUsers, getDemoDeparments, getDepartmentById, getSuperUserById, searchAdmins } from "./fn/superAdminFn";
 import { QUERY_KEYS } from "../queryKeys";
 import { DateRange } from "react-day-picker";
 
@@ -184,6 +184,29 @@ export const useEditAdmin = () => {
             })
             queryClient.invalidateQueries({
                 queryKey: [QUERY_KEYS.GET_ADMINS, 'all']
+            })
+        }
+    })
+}
+
+export const useGetAdminUsers = (adminId: string) => {
+    return useQuery({
+        queryKey: [QUERY_KEYS.GET_ALL_ADMIN_USERS, adminId],
+        queryFn: async () => getAllAdminUsers(adminId),
+        enabled: !!adminId
+    })
+}
+
+export const useAddMoreDep = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (formData: FormData) => addMoreDep(formData),
+        onSuccess: (data: any) => {
+            queryClient.invalidateQueries({
+                queryKey: [QUERY_KEYS.GET_ADMIN_ADMINID, data?._id],
+            })
+            queryClient.invalidateQueries({
+                queryKey: [QUERY_KEYS.GET_ADMIN_ADMINID],
             })
         }
     })

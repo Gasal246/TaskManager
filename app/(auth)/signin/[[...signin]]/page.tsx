@@ -15,7 +15,7 @@ import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { ThemeChanger } from '@/components/theme/ThemeChanger'
 import { useFindByMailId } from '@/query/client/userQueries'
-import { CircleCheckBig, ShieldAlert } from 'lucide-react'
+import { CircleCheckBig, Info, ShieldAlert } from 'lucide-react'
 
 const formSchema = z.object({
     email: z.string().min(2).max(50),
@@ -90,7 +90,7 @@ const LoginPage = () => {
         <div className='w-full h-screen flex flex-col items-center justify-center p-4 gap-10'>
             <div className="absolute top-10 flex justify-between items-center w-full px-10">
                 <h1 className='font-bold'>Task Manager</h1>
-                <ThemeChanger />
+                <Info />
             </div>
             <h1 className='font-black text-3xl'>Login.</h1>
             <Form {...form}>

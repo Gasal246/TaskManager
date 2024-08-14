@@ -17,6 +17,9 @@ export interface ITasks extends Document {
   }[];
   Status: String | null;
   Priority: String | null;
+  Deadline: Date | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
 }
 
 const TasksSchema: Schema = new Schema({
@@ -34,7 +37,8 @@ const TasksSchema: Schema = new Schema({
     Creator: { type: Schema.Types.ObjectId, ref: "Users" },
   }],
   Status: { type: String, enum: ['pending', 'completed'] },
-  Priority: { type: String, enum: ['high', 'average', 'low'] },
+  Priority: { type: String, enum: ['high', 'medium', 'low'] },
+  Deadline: { type: Date },
 }, { timestamps: true });
 
 const Tasks = mongoose.models?.Tasks || mongoose.model<ITasks>('Tasks', TasksSchema);

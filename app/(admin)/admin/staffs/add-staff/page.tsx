@@ -18,10 +18,11 @@ import { PlusCircleIcon, SquareX } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { formatDate } from '@/lib/utils'
 import { useSession } from 'next-auth/react'
-import { useAddNewStaff, useGetAllAreas, useGetAllRegions } from '@/query/client/adminQueries'
+import { useAddNewStaff, useGetAllAreas, useGetAllRegions, useGetAllSkills } from '@/query/client/adminQueries'
 import LoaderSpin from '@/components/shared/LoaderSpin'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
+import { ConfigProvider, Select as SELECT } from 'antd'
 
 const formSchema = z.object({
     Name: z.string().min(3, "Sorry! as per our business guidelines this is not a real name.").max(25),
@@ -29,11 +30,6 @@ const formSchema = z.object({
     Region: z.string(),
     Area: z.string()
 })
-
-type SkillTag = {
-    label: string;
-    value: string;
-}
 
 type Document = {
     name: string,
@@ -50,13 +46,21 @@ const AddStaff = () => {
     const { data: session }: any = useSession();
     const { data: allRegions, isLoading: regionsLoading } = useGetAllRegions(session?.user?.id);
     const { mutateAsync: addNewStaff, isPending: addingStaff } = useAddNewStaff();
-    const [selectedSkillTags, setSelectedSkillTags] = useState<SkillTag[] | []>([])
 
     const [documents, setDocuments] = useState<Document[] | []>([])
     const [documentName, setDocumentName] = useState<string>('');
     const [documentFile, setDocumentFile] = useState<File | null>(null);
     const [expireAt, setExpireAt] = useState<Date | null>(null);
     const [remindMe, setRemindMe] = useState<Date | null>(null);
+
+    const { data: allSkills, isLoading: loadingAllSkills } = useGetAllSkills(session?.user?.id);
+    const [selectedItems, setSelectedItems] = useState<string[]>([]);
+    const [filteredOptions, setFilteredOptions] = useState([]);
+    useEffect(() => {
+        if (allSkills) {
+            setFilteredOptions(allSkills?.Skills?.filter((o: any) => !selectedItems.includes(o)));
+        }
+    }, [allSkills, selectedItems]);
 
     const handleAddDoc = () => {
         if (!documentName || !documentFile || !expireAt || !remindMe) return null;
@@ -100,8 +104,7 @@ const AddStaff = () => {
         formData.append("Region", values.Region);
         formData.append("Area", values.Area);
 
-        const skillArray = selectedSkillTags.map((skill) => skill.value );
-        formData.append("Skills", skillArray.join(','));
+        formData.append("Skills", selectedItems.join(','));
 
         documents.forEach((doc, index) => {
             formData.append(`documents[${index}][name]`, doc.name);
@@ -109,9 +112,9 @@ const AddStaff = () => {
             formData.append(`documents[${index}][expireAt]`, doc.expireAt?.toISOString() as any);
             formData.append(`documents[${index}][remindMe]`, doc.remindMe?.toISOString() as any);
         });
-        
-        const response = await addNewStaff({formData});
-        if(response?.existing){
+
+        const response = await addNewStaff({ formData });
+        if (response?.existing) {
             return toast.error("Email is already in use.", {
                 description: "This email is currently using by some of your staffs."
             })
@@ -251,21 +254,21 @@ const AddStaff = () => {
                         }
                         <div>
                             <label className='text-sm font-medium'>Skills</label>
-                            <CreatableReactSelect
-                                className='bg-transparent text-black'
-                                placeholder="tab list the skills"
-                                onCreateOption={tag => {
-                                    setSelectedSkillTags(prev => [...prev, { value: tag, label: tag }])
+                            <ConfigProvider
+                                theme={{
+                                    token: {
+                                        colorPrimary: '#00b96b',
+                                        colorBgContainer: '#f6ffed',
+                                        colorTextPlaceholder: 'gray'
+                                    },
                                 }}
-                                components={animatedComponents}
-                                options={[...selectedSkillTags]}
-                                isMulti value={selectedSkillTags.map(tag => {
-                                    return { label: tag.label, value: tag.value }
-                                })}
-                                onChange={tags => {
-                                    setSelectedSkillTags(tags.map(tag => { return { label: tag.label, value: tag.value } }))
-                                }}
-                            />
+                            ><SELECT mode="multiple" placeholder="Filter Out Skills" value={selectedItems} style={{ width: '100%' }}
+                                onChange={setSelectedItems}
+                                options={filteredOptions.map((item) => ({
+                                    value: item,
+                                    label: item,
+                                }))}
+                                /></ConfigProvider>
                         </div>
                         <div className="w-full flex justify-end">
                             <Button type="submit" className='bg-cyan-950 text-foreground hover:bg-cyan-950/50'>create staff</Button>

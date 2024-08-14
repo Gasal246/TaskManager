@@ -48,12 +48,8 @@ export const columns: ColumnDef<IUsers>[] = [
         accessorKey: "Name",
         header: ({ column }) => {
             return (
-                <h1
-                    className="flex items-center"
-                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                >
-                    Name
-                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                <h1 className="flex items-center" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")} > 
+                    Name <ArrowUpDown className="ml-2 h-4 w-4" />
                 </h1>
             )
         },
@@ -76,12 +72,8 @@ export const columns: ColumnDef<IUsers>[] = [
         accessorKey: "Region.RegionName",
         header: ({ column }) => {
             return (
-                <h1
-                    className="flex items-center"
-                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                >
-                    Region
-                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                <h1 className="flex items-center" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")} >
+                    Region<ArrowUpDown className="ml-2 h-4 w-4" />
                 </h1>
             )
         },
@@ -90,12 +82,18 @@ export const columns: ColumnDef<IUsers>[] = [
         accessorKey: "Area.Areaname",
         header: ({ column }) => {
             return (
-                <h1
-                    className="flex items-center"
-                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                >
-                    Area
-                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                <h1 className="flex items-center" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")} >
+                    Area<ArrowUpDown className="ml-2 h-4 w-4" />
+                </h1>
+            )
+        },
+    },
+    {
+        accessorKey: "Role",
+        header: ({ column }) => {
+            return (
+                <h1 className="flex items-center capitalize" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}> 
+                    Role <ArrowUpDown className="ml-2 h-4 w-4" />
                 </h1>
             )
         },
@@ -104,12 +102,8 @@ export const columns: ColumnDef<IUsers>[] = [
         accessorKey: "Status",
         header: ({ column }) => {
             return (
-                <h1
-                    className="flex items-center"
-                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                >
-                    Status
-                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                <h1 className="flex items-center" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}> 
+                    Status <ArrowUpDown className="ml-2 h-4 w-4" />
                 </h1>
             )
         },

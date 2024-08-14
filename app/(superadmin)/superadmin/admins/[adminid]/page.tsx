@@ -1,8 +1,9 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client"
 import { Button } from '@/components/ui/button'
-import { useChangeAdminStatus, useDeleteAdmin, useDeleteAdminDep, useDeleteAdminDoc, useFindAdminByAdminId } from '@/query/client/superuserQueries'
+import { useChangeAdminStatus, useDeleteAdmin, useDeleteAdminDep, useDeleteAdminDoc, useFindAdminByAdminId, useGetAdminUsers } from '@/query/client/superuserQueries'
 import { Avatar, Popconfirm, Tooltip } from 'antd'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Popover, PopoverContent, PopoverTrigger, } from "@/components/ui/popover"
 import { DotsHorizontalIcon, TrashIcon } from '@radix-ui/react-icons'
 import Link from 'next/link'
@@ -18,16 +19,25 @@ import { motion } from 'framer-motion'
 import EditDepartmentDialog from '@/components/super/EditDepartmentDialog'
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator, } from "@/components/ui/breadcrumb"
 import EditAdminDialog from '@/components/super/EditAdminDialog'
-import { formatDateTiny } from '@/lib/utils'
+import { formatDateTiny, formatNumber } from '@/lib/utils'
 import AddAdminDocumentsDialog from '@/components/super/AddAdminDocumentsDialog'
+import { AdminCountBoxSkelton, DepartmentsLoadingSkelton, ProfileInfoSkelton } from './skeletons'
+import ShowAdminUsers from '@/components/super/ShowAdminUsers'
+import AddMoreDepDialog from '@/components/super/AddMoreDepDialog'
 
 const AdminPage = ({ params }: { params: { adminid: string } }) => {
   const router = useRouter();
   const { data: adminData, isLoading: adminDataLoading } = useFindAdminByAdminId(params.adminid);
   const { mutateAsync: changeAdminStatus, isPending: changingAdminStatus } = useChangeAdminStatus();
   const { mutateAsync: deleteAdmin, isPending: deletingAdmin } = useDeleteAdmin();
-  const { mutateAsync: deleteAdminDoc, isPending:deletingAdminDoc } = useDeleteAdminDoc();
-  const { mutateAsync: deleteAdminDep, isPending:deletingAdminDep } = useDeleteAdminDep();
+  const { mutateAsync: deleteAdminDoc, isPending: deletingAdminDoc } = useDeleteAdminDoc();
+  const { mutateAsync: deleteAdminDep, isPending: deletingAdminDep } = useDeleteAdminDep();
+  const { data: adminUsers, isLoading: adminUsersLoading, refetch: refechAdminUsers } = useGetAdminUsers(adminData?.AdminId?._id)
+  useEffect(() => {
+    if (adminData) {
+      refechAdminUsers();
+    }
+  }, [adminData])
 
   const handleStatusChange = async (value: any) => {
     const response = await changeAdminStatus({ adminid: params.adminid, status: value });
@@ -60,7 +70,7 @@ const AdminPage = ({ params }: { params: { adminid: string } }) => {
     formData.append('depId', depid);
     formData.append('adminId', adminData?._id);
     const response = await deleteAdminDep(formData);
-    if(response?._id){
+    if (response?._id) {
       return toast.success("Department Successfully Deleted.")
     }
   }
@@ -79,13 +89,13 @@ const AdminPage = ({ params }: { params: { adminid: string } }) => {
         </BreadcrumbList>
       </Breadcrumb>
       <div className="flex items-center justify-between">
-        <div className='flex items-center gap-1'>
+        {adminDataLoading ? <ProfileInfoSkelton /> : <div className='flex items-center gap-1'>
           <Avatar src={adminData?.AdminId?.AvatarUrl} size={45} />
           <div>
             <h1 className='font-bold text-xl'>{adminData?.AdminId?.Name} <Badge variant={adminData?.AdminId?.Status == 'active' ? "outline" : "destructive"}>{changingAdminStatus ? 'changing...' : (adminData?.AdminId?.InitialEntry ? 'initial' : adminData?.AdminId?.Status)}</Badge></h1>
             <h2 className="text-sm">{adminData?.AdminId?.Email}</h2>
           </div>
-        </div>
+        </div>}
         <div className="flex">
           <Popover>
             <PopoverTrigger asChild>
@@ -127,7 +137,39 @@ const AdminPage = ({ params }: { params: { adminid: string } }) => {
           </Popover>
         </div>
       </div>
-      <div className="flex flex-wrap mt-5 mb-2">
+
+      {!adminUsers || adminUsersLoading ? <AdminCountBoxSkelton /> :
+        <div className="flex flex-wrap mt-5">
+          <div className="w-full md:w-2/12 p-1">
+            <ShowAdminUsers trigger={
+              <Tooltip title="view all users"><motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="bg-slate-900 border-slate-600 border p-3 rounded-md aspect-auto cursor-pointer select-none">
+                <h2 className='text-sm font-medium'>Total Users</h2>
+                <div className="justify-center items-center">
+                  <h1 className='text-center text-[4em] font-black '>{adminUsers?.length}</h1>
+                </div>
+              </motion.div></Tooltip>
+            } adminData={adminData} adminUsers={adminUsers} />
+          </div>
+          <div className="w-full md:w-2/12 p-1">
+            <div className="bg-slate-900 border-slate-600 border p-3 rounded-md aspect-auto">
+              <h2 className='text-sm font-medium'>Total Projects</h2>
+              <div className="justify-center items-center">
+                <h1 className='text-center text-[4em] font-black '>5</h1>
+              </div>
+            </div>
+          </div>
+          <div className="w-full md:w-2/12 p-1">
+            <div className="bg-slate-900 border-slate-600 border p-3 rounded-md aspect-auto">
+              <h2 className='text-sm font-medium'>Ongoing Projects</h2>
+              <div className="justify-center items-center">
+                <h1 className='text-center text-[4em] font-black '>{formatNumber(5)}</h1>
+              </div>
+            </div>
+          </div>
+        </div>}
+
+      <h1 className='mt-5 font-semibold'>Departments</h1>
+      {adminDataLoading ? <DepartmentsLoadingSkelton /> : <div className="flex flex-wrap mb-2">
         {
           adminData?.Departments?.map((department: any) => (
             <div className="w-3/12 p-1" key={department?._id}>
@@ -152,9 +194,16 @@ const AdminPage = ({ params }: { params: { adminid: string } }) => {
             </div>
           ))
         }
-      </div>
+        <div className="w-3/12 p-1">
+          <AddMoreDepDialog trigger={
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="cursor-pointer bg-primary border-2 border-slate-900 p-3 justify-center items-center h-full flex rounded-xl">
+              <h1 className='flex gap-2 font-bold text-black'>Add More <FilePlus2 /></h1>
+            </motion.div>
+          } adminId={params.adminid} />
+        </div>
+      </div>}
       <h4 className='font-medium'>Documents</h4>
-      <div className="flex flex-wrap items-center">
+      {adminDataLoading ? <DepartmentsLoadingSkelton /> : <div className="flex flex-wrap items-center">
         {adminData?.Documents?.map((doc: any) => (
           <div className="w-full lg:w-3/12 p-1" key={doc?._id}>
             <div className="bg-slate-900 border border-slate-600 p-2 w-full rounded-md">
@@ -180,7 +229,7 @@ const AdminPage = ({ params }: { params: { adminid: string } }) => {
             <motion.h1 whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }} className="cursor-pointer bg-cyan-700 border border-slate-600 p-2 flex gap-2 items-center text-sm font-semibold text-black justify-center rounded-full">Add Document <FilePlus2 /></motion.h1>
           } adminId={adminData?.AdminId?._id} />
         </div>
-      </div>
+      </div>}
     </div>
   )
 }

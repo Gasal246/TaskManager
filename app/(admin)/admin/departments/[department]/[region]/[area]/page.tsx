@@ -1,17 +1,19 @@
 "use client"
 import React from 'react'
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator, } from "@/components/ui/breadcrumb"
-import { useDeleteDepartmentArea, useGetAreaById, useGetDepartmentById, useGetDepartmentStaffs, useGetRegionById } from '@/query/client/adminQueries'
+import { useDeleteDepartmentArea, useGetAreaById, useGetDepartmentById, useGetRegionById } from '@/query/client/adminQueries'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { Avatar, Tooltip } from 'antd'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger, } from "@/components/ui/alert-dialog"
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
-import AddStaffDialog from '@/components/admin/AddStaffDialog'
 import { columns } from "./columns"
 import { DataTable } from "./data-table"
 import LoaderSpin from '@/components/shared/LoaderSpin'
+import { useGetAreaStaffs } from '@/query/client/depQueries'
+import TableSkeleton from '@/components/skeletons/TableSkeleton'
+import AddAreaStaff from '@/components/admin/AddAreaStaff'
 
 const DepartmentArea = ({ params }: { params: { department: string, region: string, area: string } }) => {
     const router = useRouter();
@@ -19,8 +21,7 @@ const DepartmentArea = ({ params }: { params: { department: string, region: stri
     const { data: region, isLoading: loadingRegion } = useGetRegionById(params?.region);
     const { data: area, isLoading: loadingArea } = useGetAreaById(params?.area);
     const { mutateAsync: deleteArea, isPending: deletingArea } = useDeleteDepartmentArea();
-    const { data: departmentStaffs, isLoading: loadingStaffData } = useGetDepartmentStaffs({ depid: params.department, areaid: params.area });
-
+    const { data: staffList, isLoading: loadingStaffList } = useGetAreaStaffs(params.department, params.region, params.area);
     const handleDeleteArea = async () => {
         const response = await deleteArea({ depid: params.department, regionid: params.region, areaid: params.area });
         if (response?.deleted) {
@@ -53,7 +54,7 @@ const DepartmentArea = ({ params }: { params: { department: string, region: stri
                             </BreadcrumbItem>
                         </BreadcrumbList>
                     </Breadcrumb>
-                    <div className="flex justify-between">
+                    <div className="flex justify-between bg-slate-950/50 p-3 rounded-lg mt-2">
                         <div>
                             <h1 className='font-bold text-2xl mb-2'>{area?.Areaname}</h1>
                             {area?.AreaHead ? <Tooltip title="Area Head">
@@ -72,11 +73,11 @@ const DepartmentArea = ({ params }: { params: { department: string, region: stri
                                     Manage Area
                                 </motion.h1>
                             </Link>
-                            <AddStaffDialog trigger={
+                            <AddAreaStaff trigger={
                                 <motion.h1 whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className='p-1 hover:bg-cyan-950 rounded-sm px-3 border-2 border-slate-400 cursor-pointer'>
                                     Add Staff
                                 </motion.h1>
-                            } depid={params?.department} areaid={params?.area} />
+                            } regId={params.region} areaId={params.area} depId={params.department} />
 
                             <AlertDialog>
                                 <AlertDialogTrigger>
@@ -99,8 +100,10 @@ const DepartmentArea = ({ params }: { params: { department: string, region: stri
                             </AlertDialog>
                         </div>
                     </div>
-                    <div className="">
-                        {departmentStaffs?.Staffs && <DataTable data={departmentStaffs?.Staffs} columns={columns} />}
+                    <div className="bg-slate-950/50 p-3 mt-2 rounded-lg">
+                        <h1 className='text-sm font-medium text-neutral-200'>Regional Staffs</h1>
+                        {loadingStaffList && <TableSkeleton />}
+                        {staffList && <DataTable data={staffList?.Staffs} columns={columns} />}
                     </div></>
             }
         </div>

@@ -1,8 +1,5 @@
 import connectDB from "@/lib/mongo";
-import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
-import { authOptions } from "../../auth/[...nextauth]/route";
-import Superadmin from "@/models/superAdminCollection";
 import Admindatas from "@/models/adminDataCollection";
 
 connectDB();

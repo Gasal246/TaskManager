@@ -19,11 +19,11 @@ const AdminLayout = async ({ children }: {
     return redirect('/signin')
   }
   return (
-    <div className='w-full h-screen overflow-hidden'>
+    <div className='w-full h-screen overflow-y-hidden'>
       <AdminTopbar />
       <div className="flex w-full h-full">
         <div className="w-2/12 h-full"><AdminSidebar /></div>
-        <div className="w-10/12 h-full">{children}</div>
+        <div className="w-10/12 h-full overflow-y-scroll">{children}</div>
       </div>
     </div>
   )

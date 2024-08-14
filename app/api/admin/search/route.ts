@@ -15,7 +15,7 @@ export async function GET(req: NextRequest){
         const admins = await Admindatas.aggregate([
             {
                 $lookup: {
-                    from: "users", // The name of the collection you want to join with
+                    from: "users",
                     localField: "AdminId",
                     foreignField: "_id",
                     as: "adminDetails"

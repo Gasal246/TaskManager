@@ -118,7 +118,7 @@ const ProjectPage = ({ params }: { params: { projectid: string } }) => {
             <div className="bg-slate-300 p-2 rounded-md">
               <AddProjectDocDialog trigger={
                 <motion.h1 whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }} className='cursor-pointer bg-white text-black text-sm px-3 p-1 rounded-full flex font-bold gap-1'>Add Document <FilePlus2 size={18} /></motion.h1>
-              } />
+              } projectId='' />
             </div>
           </div>
         </div>

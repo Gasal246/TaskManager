@@ -6,6 +6,7 @@ export enum QUERY_KEYS {
     GET_ADMIN_WITHIN = "getAdminsWithin",
     GET_ADMIN_ADMINID = "getAdminByAdminId",
     GET_DEPARTMENT_ID = "getDepartmentById",
+    GET_ALL_ADMIN_USERS = "getAllAdminUsers",
     
     // admin keys
     GET_ALL_ADMIN_DATA = "getAllAdminDataForSuperAdmin",
@@ -22,6 +23,9 @@ export enum QUERY_KEYS {
     GET_DEPARTMENT_STAFFS = "getDepartmentStaffs",
     GET_REGION_STAFFS = "getRegionStaffs",
     GET_AREA_STAFFS = "getAreaStaffs",
+    GET_ALL_SKILLS = "getAllSkills",
+    GET_AVAILABLE_STAFFS = "getAllAvailableStaffs",
+    GET_REGIONAL_STAFFS = "getAllRegionalStaffs",
 
     // user keys
     GET_USER_BY_ID = "getUserByUserid",

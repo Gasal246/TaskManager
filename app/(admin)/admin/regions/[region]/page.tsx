@@ -43,11 +43,11 @@ const RegionPage = ({ params }: { params: { region: string } }) => {
                     </BreadcrumbItem>
                 </BreadcrumbList>
             </Breadcrumb>
-            <div className="flex justify-between mt-2 items-center flex-wrap mb-4">
+            <div className="flex justify-between my-3 items-center flex-wrap mb-4 bg-slate-950/50 p-3 rounded-lg">
                 <div className=''>
-                    <h1 className='font-bold text-2xl flex gap-1'>Region {regionLoading ? <LoaderSpin size={20} /> : regionData?.RegionName}</h1>
+                    <h1 className='font-bold text-2xl flex gap-1 mb-1'>Region {regionLoading ? <LoaderSpin size={20} /> : regionData?.RegionName}</h1>
                     <div className="flex gap-1 items-center">
-                        <Avatar src={regionData?.RegionHead?.AvatarUrl || '/avatar.png'}/>
+                        <Avatar src={regionData?.RegionHead?.AvatarUrl || '/avatar.png'} />
                         <div>
                             <h2 className='font-medium flex gap-1 leading-4'>{regionData?.RegionHead?.Name}</h2>
                             <h2 className='font-medium text-xs flex gap-1'>{regionData?.RegionHead?.Email}</h2>
@@ -93,20 +93,22 @@ const RegionPage = ({ params }: { params: { region: string } }) => {
                     </AlertDialog>
                 </div>}
             </div>
-            <h1 className='flex items-center gap-1'>{allAreas?.length > 0 ? 'Added areas:' : 'No Areas Added'} {areasLoading && <LoaderSpin size={30} />}</h1>
-            <div className='flex flex-wrap'>
-                {
-                    allAreas?.map((area: any) => (
-                        <div key={area?._id} className="w-full md:w-3/12 p-1">
-                            <Tooltip title="click to edit & add area head">
-                                <motion.div onClick={() => router.push(`/admin/regions/${params?.region}/${area?._id}`)} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="w-full h-full bg-sky-700 p-2 flex items-center justify-center gap-1 rounded-sm hover:shadow-md cursor-pointer">
-                                    <LandPlot size={18} />
-                                    <h1>{area?.Areaname}</h1>
-                                </motion.div>
-                            </Tooltip>
-                        </div>
-                    ))
-                }
+            <div className="bg-slate-950/50 p-3 rounded-lg">
+                <h1 className='flex items-center gap-1'>{allAreas?.length > 0 ? 'Added areas:' : 'No Areas Added'} {areasLoading && <LoaderSpin size={30} />}</h1>
+                <div className='flex flex-wrap'>
+                    {
+                        allAreas?.map((area: any) => (
+                            <div key={area?._id} className="w-full md:w-3/12 p-1">
+                                <Tooltip title="click to edit & add area head">
+                                    <motion.div onClick={() => router.push(`/admin/regions/${params?.region}/${area?._id}`)} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="w-full h-full bg-sky-700 p-2 flex items-center justify-center gap-1 rounded-sm hover:shadow-md cursor-pointer">
+                                        <LandPlot size={18} />
+                                        <h1>{area?.Areaname}</h1>
+                                    </motion.div>
+                                </Tooltip>
+                            </div>
+                        ))
+                    }
+                </div>
             </div>
         </div>
     )

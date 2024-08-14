@@ -1,6 +1,6 @@
 import { QUERY_KEYS } from "../queryKeys";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { addAreaHead, addDepartmentArea, addDepartmentHead, addDepartmentRegion, addNewArea, addNewRegion, addNewStaff, addRegionalHead, addStaffDocument, addStaffSkill, addStaffToDepartment, changeProfilePic, deleteArea, deleteDepartmentArea, deleteDepartmentRegion, deleteRegion, deleteStaff, deleteStaffDocument, editAreaName, editProfileInfo, editRegionName, getAllAreas, getAllDepartments, getAllRegions, getAllStaffs, getAreaById, getDepartmentById, getDepartmentRegion, getDepartmentStaffs, getOneStaff, getRegionById, getStaffsRegionAndArea, removeDepartmentStaff, removeStaffSkill, updateStaff, updateStaffStatus } from "./fn/adminFn";
+import { addAreaHead, addDepartmentArea, addDepartmentHead, addDepartmentRegion, addNewArea, addNewRegion, addNewSkill, addNewStaff, addRegionalHead, addStaffDocument, addStaffSkill, addStaffToDepartment, changeProfilePic, deleteArea, deleteDepartmentArea, deleteDepartmentRegion, deleteRegion, deleteSkill, deleteStaff, deleteStaffDocument, editAreaName, editProfileInfo, editRegionName, editSkills, getAllAreas, getAllDepartments, getAllRegions, getAllSkills, getAllStaffs, getAreaById, getDepartmentById, getDepartmentRegion, getOneStaff, getRegionById, getStaffsRegionAndArea, removeDepartmentStaff, removeStaffSkill, updateStaff, updateStaffStatus } from "./fn/adminFn";
 
 export const useGetAllRegions = (adminid: string) => {
     return useQuery({
@@ -321,14 +321,6 @@ export const useGetStaffsRegionArea = (adminid: string) => {
     })
 }
 
-export const useGetDepartmentStaffs = ({ depid, regionid, areaid }: { depid: string, regionid?: string, areaid?: string }) => {
-    return useQuery({
-        queryKey: [QUERY_KEYS.GET_DEPARTMENT_STAFFS, depid, regionid || areaid],
-        queryFn: async () => await getDepartmentStaffs(depid, regionid, areaid),
-        enabled: !!depid
-    })
-}
-
 export const useAddStaffFromDepArea = () => {
     const queryClient = useQueryClient();
     return useMutation({
@@ -402,6 +394,50 @@ export const useRemoveDepartmentStaff = () => {
             })
             queryClient.invalidateQueries({
                 queryKey: [QUERY_KEYS.GET_DEPARTMENT_STAFFS, data?._id]
+            })
+        }
+    })
+}
+
+export const useGetAllSkills = (adminId: string) => {
+    return useQuery({
+        queryKey: [QUERY_KEYS.GET_ALL_SKILLS],
+        queryFn: async () => await getAllSkills(adminId),
+        enabled: !!adminId
+    })
+}
+
+export const useAddNewSkill = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async ({ adminId, skill }: { adminId: string, skill: string }) => addNewSkill(adminId, skill),
+        onSuccess: (data: any) => {
+            queryClient.invalidateQueries({
+                queryKey: [QUERY_KEYS.GET_ALL_SKILLS]
+            })
+        }
+    })
+}
+
+export const useEditSkill = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async ({ adminId, skill, correctedSkill  }: { adminId: string, skill: string, correctedSkill: string }) => editSkills(adminId, skill, correctedSkill),
+        onSuccess: (data: any) => {
+            queryClient.invalidateQueries({
+                queryKey: [QUERY_KEYS.GET_ALL_SKILLS]
+            })
+        }
+    })
+}
+
+export const useDeleteSkill = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async ({ adminId, skill }: { adminId: string, skill: string }) => deleteSkill(adminId, skill),
+        onSuccess: (data: any) => {
+            queryClient.invalidateQueries({
+                queryKey: [QUERY_KEYS.GET_ALL_SKILLS]
             })
         }
     })

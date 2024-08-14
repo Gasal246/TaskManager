@@ -77,8 +77,8 @@ const StaffPage = ({ params }: { params: { staffid: string } }) => {
         <h1>{deletingUser ? 'Deleting...' : 'loading...'}</h1>
         <Image src={'/assets/walk.gif'} alt='walkanimation' width={60} height={60} />
         <h1>please wait...</h1>
-      </div> : <div className="flex justify-between items-center flex-wrap">
-        <div className="flex gap-1 items-center mb-3">
+      </div> : <div className="bg-slate-950/50 p-3 rounded-lg mb-3"> <div className="flex justify-between items-center flex-wrap">
+        <div className="flex gap-1 items-center mb-3 bg-slate95">
           <Avatar src={staffData?.AvatarUrl ? `${staffData?.AvatarUrl}` : `/avatar.png`} size={55} />
           <div className="flex flex-col">
             <span className='font-black text-2xl leading-6'>{staffData?.Name}</span>
@@ -123,15 +123,17 @@ const StaffPage = ({ params }: { params: { staffid: string } }) => {
             </AlertDialogContent>
           </AlertDialog>
         </div>
-      </div>}
-
-      <div className="flex gap-1 mb-3">
-        <Tooltip title={`${staffLoading ? 'loading..' : 'Region'}`}><h1 className='flex gap-1 bg-slate-800 p-1 px-3 text-sm rounded-md'><Globe2 size={20} /> {staffData?.Region?.RegionName}</h1></Tooltip>
-        <Tooltip title={`${staffLoading ? 'loading..' : 'Area'}`}><h1 className='flex gap-1 bg-slate-800 p-1 px-3 text-sm rounded-md'><LandPlot size={20} /> {staffData?.Area?.Areaname}</h1></Tooltip>
       </div>
+        <div className="flex gap-1 mb-3">
+          <Tooltip title={`${staffLoading ? 'loading..' : 'Region'}`}><h1 className='flex gap-1 bg-slate-700 p-1 px-3 text-sm rounded-md'><Globe2 size={20} /> {staffData?.Region?.RegionName}</h1></Tooltip>
+          <Tooltip title={`${staffLoading ? 'loading..' : 'Area'}`}><h1 className='flex gap-1 bg-slate-700 p-1 px-3 text-sm rounded-md'><LandPlot size={20} /> {staffData?.Area?.Areaname}</h1></Tooltip>
+        </div>
+      </div>
+      }
 
-      <div className="mb-4">
-        <h1 className='text-sm'>Skills:</h1>
+
+      <div className="mb-4 bg-slate-950/50 p-3 py-5 rounded-lg">
+        <h1 className='text-sm mb-1'>Skills:</h1>
         <div className="flex gap-1 flex-wrap">
           {staffData?.Skills?.map((skill: any) => (
             <h1 key={skill} className='bg-white text-black text-sm px-3 p-1 rounded-sm flex gap-2'>{skill} <SquareX onClick={() => handleRemoveSkill(skill)} className='text-slate-800 hover:text-red-700 cursor-pointer' size={20} /></h1>
@@ -142,8 +144,8 @@ const StaffPage = ({ params }: { params: { staffid: string } }) => {
         </div>
       </div>
 
-      <div className="">
-        <h1 className='text-sm font-medium pl-1'>Documents:</h1>
+      <div className="bg-slate-950/50 p-3 py-5 rounded-lg">
+        <h1 className='text-sm font-medium pl-1 mb-1'>Documents:</h1>
         <div className="flex flex-wrap items-center">
           {staffData?.Documents?.map((doc: any) => (
             <div className="w-3/12 p-1" key={doc?._id}>
@@ -155,7 +157,7 @@ const StaffPage = ({ params }: { params: { staffid: string } }) => {
                   <h3 className='text-xs font-medium text-slate-400'>Exp: <span className='text-cyan-600'>{formatDateShortly(doc?.ExpireAt)}</span></h3>
                   <h3 className='text-xs font-medium text-slate-400'>Remind: <span className='text-cyan-600'>{formatDateShortly(doc?.RemindAt)}</span></h3>
                   <motion.div whileTap={{ scale: 0.98 }} whileHover={{ scale: 1.05 }} className='absolute top-2 right-2'>
-                    <Popconfirm title='Delete Document' description='Are you sure about to delete this document ?' cancelText='No' okText='Yes' onConfirm={() => handleDeleteDocument(doc?._id)}><Trash2 size={18} className='hover:text-red-600'/></Popconfirm>
+                    <Popconfirm title='Delete Document' description='Are you sure about to delete this document ?' cancelText='No' okText='Yes' onConfirm={() => handleDeleteDocument(doc?._id)}><Trash2 size={18} className='hover:text-red-600' /></Popconfirm>
                   </motion.div>
                 </div>
               </Tooltip>

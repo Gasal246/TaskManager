@@ -3,12 +3,16 @@ import React, { useState } from 'react'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, } from "@/components/ui/dialog"
 import { Input } from '../ui/input'
 import { Button } from '../ui/button'
-import { useAddSkillToStaff } from '@/query/client/adminQueries'
+import { useAddSkillToStaff, useGetAllSkills } from '@/query/client/adminQueries'
 import { toast } from 'sonner'
+import { Select } from 'antd';
+import { useSession } from 'next-auth/react'
 
 const AddStaffSkillDialog = ({ trigger, staffid }: { trigger: React.ReactNode, staffid: string }) => {
     const [input, setInput] = useState('');
-    const { mutateAsync: addSkill, isPending: addingSkill } = useAddSkillToStaff()
+    const { data: session }: any = useSession();
+    const { mutateAsync: addSkill, isPending: addingSkill } = useAddSkillToStaff();
+    const { data: allSkills, isLoading: loadingAllSkills } = useGetAllSkills(session?.user?.id);
 
     const handleAddSkill = async () => {
         if (!input || input.length <= 0) { return }
@@ -26,10 +30,22 @@ const AddStaffSkillDialog = ({ trigger, staffid }: { trigger: React.ReactNode, s
                 <DialogHeader>
                     <DialogTitle>Add New Skill</DialogTitle>
                 </DialogHeader>
-            <div>
-                <Input placeholder='Enter Staff Skill' className='mb-2' value={input} onChange={(e) => setInput(e.target.value)} />
-                <Button onClick={handleAddSkill} disabled={addingSkill}>{addingSkill ? 'adding..' : 'Continue'}</Button>
-            </div>
+                <div className='flex flex-col gap-1'>
+                    {allSkills?.Skills && (
+                        <Select
+                            showSearch
+                            placeholder="Select the skill to add"
+                            optionFilterProp='label'
+                            onChange={(value: string) => setInput(value)}
+                            options={
+                                allSkills.Skills.map((skill: string) => ({
+                                    label: skill,
+                                    value: skill,
+                                }))
+                            }
+                        />
+                    )}<Button onClick={handleAddSkill} disabled={addingSkill}>{addingSkill ? 'adding..' : 'Continue'}</Button>
+                </div>
             </DialogContent>
         </Dialog>
     )

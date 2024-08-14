@@ -22,7 +22,7 @@ export interface IUsers extends Document {
   AvatarUrl: String | null;
   Status: String | null;
   IsDeleted: Boolean;
-  Role: 'admin' | 'staff' | 'area-head' | 'dep-head' | 'region-head';
+  Role: 'admin' | 'staff' | 'area-head' | 'dep-head' | 'region-head' | 'dep-staff' | 'reg-staff';
 }
 
 const UsersSchema: Schema = new Schema({
@@ -44,7 +44,7 @@ const UsersSchema: Schema = new Schema({
   Region: { type: Schema.Types.ObjectId, ref: "Regions" },
   Area: { type: Schema.Types.ObjectId, ref: "Areas" },
   IsDeleted: { type: Boolean, default: false },
-  Role: { type: String, enum: ['admin', 'staff', 'area-head', 'dep-head', 'region-head']}
+  Role: { type: String, enum: ['admin', 'staff', 'area-head', 'dep-head', 'region-head', 'dep-staff', 'reg-staff']}
 }, { timestamps: true });
 
 const Users = mongoose.models?.Users || mongoose.model<IUsers>('Users', UsersSchema);

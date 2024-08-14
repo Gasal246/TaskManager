@@ -47,11 +47,12 @@ const formSchema = z.object({
     priority: z.string(),
     selectedUsers: z.array(z.string()).refine((value) => value.some((item) => item), {
         message: "You have to select at least one item.",
-    })
+    }),
+    deadline: z.string().date().optional()
 })
 
 const AddTaskPage = () => {
-    const { data: session}: any = useSession();
+    const { data: session }: any = useSession();
     const { mutateAsync: addNewTask, isPending: addingNewTask } = useAddNewTask();
     const { data: stafflist, isLoading: loadingStaffList } = useGetChoosableStaffs(session?.user?.id)
     const form = useForm<z.infer<typeof formSchema>>({
@@ -61,7 +62,8 @@ const AddTaskPage = () => {
             description: "",
             projectid: "",
             priority: "low",
-            selectedUsers: []
+            selectedUsers: [],
+            deadline: ''
         },
     })
 
@@ -72,6 +74,7 @@ const AddTaskPage = () => {
         values?.projectid && formData.append('projectid', values.projectid);
         formData.append('priority', values.priority);
         formData.append('selectedUsers', values.selectedUsers?.join(','));
+        formData.append('deadline', values.deadline+'');
         const response = await addNewTask({ formData: formData })
     }
     return (
@@ -119,28 +122,19 @@ const AddTaskPage = () => {
                             </FormItem>
                         )}
                     />
-                    {/* <FormField
+                    <FormField
                         control={form.control}
-                        name="projectid"
+                        name="deadline"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Touched with any existing projects ?</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                    <FormControl>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="select a project assosiated with this task" />
-                                        </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                        <SelectItem value="high">High</SelectItem>
-                                        <SelectItem value="average">Average</SelectItem>
-                                        <SelectItem value="low">Low</SelectItem>
-                                    </SelectContent>
-                                </Select>
+                                <FormLabel>Task Name</FormLabel>
+                                <FormControl>
+                                    <Input type="date" placeholder="select the date" {...field} />
+                                </FormControl>
                                 <FormMessage />
                             </FormItem>
                         )}
-                    /> */}
+                    />
                     <FormField
                         control={form.control}
                         name="priority"
@@ -199,7 +193,7 @@ const AddTaskPage = () => {
                                                     </FormControl>
                                                     <FormLabel className="font-normal">
                                                         <div className="flex gap-1 items-center">
-                                                            <Avatar src={item?.AvatarUrl || '/avatar.png'} size={25}/>
+                                                            <Avatar src={item?.AvatarUrl || '/avatar.png'} size={25} />
                                                             <div>
                                                                 <h3 className="text-xs leading-3">{item?.Name}</h3>
                                                                 <h3 className="text-xs">{item?.Email}</h3>

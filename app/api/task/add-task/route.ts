@@ -13,6 +13,7 @@ interface Body {
     projectid?: string;
     priority: 'high' | 'average' | 'low';
     selectedUsers: string;
+    deadline?: string;
     [key: string]: any; // For dynamic document properties
 }
 
@@ -33,7 +34,8 @@ export async function POST(req: NextRequest) {
             Priority: body?.priority,
             Status: 'pending',
             AdminId: user?.Addedby,
-            ForwardList: body?.selectedUsers.split(',')
+            ForwardList: body?.selectedUsers.split(','),
+            Deadline: body?.deadline || null
         })
         const savedTask = await newTask.save();
         return Response.json(savedTask);

@@ -9,6 +9,7 @@ import EditAreaDialog from '@/components/admin/EditAreaDialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger, } from "@/components/ui/alert-dialog"
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
+import { Avatar, Popconfirm } from 'antd';
 
 const AreaPage = ({ params }: { params: { region: string, area: string } }) => {
     const router = useRouter();
@@ -18,7 +19,7 @@ const AreaPage = ({ params }: { params: { region: string, area: string } }) => {
 
     const handleDeleteArea = async () => {
         const response = await deleteArea(params.area);
-        if(response?._id){
+        if (response?._id) {
             router.replace(`/admin/regions/${params.region}`);
             return toast.success("Area Deleted Successfully.");
         }
@@ -42,11 +43,16 @@ const AreaPage = ({ params }: { params: { region: string, area: string } }) => {
                     </BreadcrumbItem>
                 </BreadcrumbList>
             </Breadcrumb>
-            <div className="flex justify-between mt-2 items-center flex-wrap">
-                <div>
-                    <h1 className='text-xl font-bold'>Area {areaLoading ? <LoaderSpin size={20} /> : areaData?.Areaname}</h1>
-                    <h2 className='text-sm'>{areaData?.AreaHead?.Name}</h2>
-                    <h2 className='text-xs'>{areaData?.AreaHead?.Email}</h2>
+            <div className="flex justify-between mt-2 items-center flex-wrap bg-slate-950/50 p-3 rounded-lg">
+                <div className=''>
+                    <h1 className='text-2xl font-bold mb-2'>Area {areaLoading ? <LoaderSpin size={20} /> : areaData?.Areaname}</h1>
+                    {areaData?.AreaHead && <div className="flex items-center gap-1">
+                        <Avatar src={areaData?.AreaHead?.AvatarUrl || "/avatar.png"} size={35} />
+                        <div>
+                            <h2 className='text-sm leading-3 font-semibold'>{areaData?.AreaHead?.Name}</h2>
+                            <h2 className='text-xs'>{areaData?.AreaHead?.Email}</h2>
+                        </div>
+                    </div>}
                     <h2 className='font-medium text-xs flex gap-1 text-orange-300'>{!areaData?.AreaHead && 'no Head for this area.'}</h2>
                 </div>
                 {areaData && <div className="flex gap-1 flex-wrap">
@@ -60,26 +66,9 @@ const AreaPage = ({ params }: { params: { region: string, area: string } }) => {
                             Edit
                         </motion.h1>
                     } areaData={areaData} />
-                    <AlertDialog>
-                        <AlertDialogTrigger>
-                            <motion.h1 whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className='p-1 hover:bg-red-900 bg-slate-800 rounded-lg px-6 border border-slate-400 cursor-pointer'>
-                                Delete
-                            </motion.h1>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                            <AlertDialogHeader>
-                                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                    This action cannot be undone. This will permanently delete your Area
-                                    and remove all related data from our servers.
-                                </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={handleDeleteArea}>Continue</AlertDialogAction>
-                            </AlertDialogFooter>
-                        </AlertDialogContent>
-                    </AlertDialog>
+                    <Popconfirm title="Deleting Area ?" description="Are you sure want to delete this department area ?" onConfirm={handleDeleteArea}><motion.h1 whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className='p-1 hover:bg-red-900 bg-slate-800 rounded-lg px-6 border border-slate-400 cursor-pointer'>
+                        Delete
+                    </motion.h1></Popconfirm>
                 </div>}
             </div>
         </div>

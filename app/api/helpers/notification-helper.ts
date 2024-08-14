@@ -6,7 +6,7 @@ const pusherServer = getPusherInstance();
 
 connectDB();
 
-export const sendNotification = async (title: string, description: string, senderid: string, receiverid: string, Type?: string) => {
+export const sendNotification = async (title: string, description: string, senderid: string, receiverid: string, Type?: 'role-change' | '') => {
     try {
         const newNotification = new Notifications({
             Title: title,

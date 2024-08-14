@@ -272,16 +272,6 @@ export async function addStaffToDepartment(depid: string, staffid: string, areai
     }
 }
 
-export async function getDepartmentStaffs(depid: string, regionid?: string, areaid?: string){
-    try {
-        const res = await axios.get(`/api/department/get-staffs/${depid}${regionid ? '?regionid='+regionid : ''}${areaid ? '?areaid='+areaid : ''}`);
-        console.log(res.data)
-        return res.data;
-    } catch (error) {
-        console.log(error);
-    }
-}
-
 export async function addRegionalHead(regionid: string, staffid: string){
     try {
         const res = await axios.post('/api/region/add-head', { regionid, staffid });
@@ -324,5 +314,41 @@ export async function removeDepartmentStaff(depid: string, staffid: string){
         return res.data;
     } catch (error) {
         console.log(error)
+    }
+}
+
+export async function getAllSkills(adminId: string){
+    try {
+        const res = await axios.get(`/api/skills/get-all/${adminId}`);
+        return res.data;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export async function addNewSkill(adminId: string, skill: string){
+    try {
+        const res = await axios.post('/api/skills/add', { adminId, skill });
+        return res.data;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export async function editSkills(adminId: string, skill: string, correctedSkill: string){
+    try {
+        const res = await axios.post('/api/skills/edit', { adminId, skill, correctedSkill });
+        return res.data;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export async function deleteSkill(adminId: string, skill: string){
+    try {
+        const res = await axios.post('/api/skills/delete', { adminId, skill });
+        return res.data;
+    } catch (error) {
+        console.log(error);
     }
 }

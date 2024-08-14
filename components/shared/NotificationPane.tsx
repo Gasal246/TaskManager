@@ -71,7 +71,7 @@ const NotificationPane = ({ trigger }: { trigger: React.ReactNode }) => {
             <SheetContent className="w-[400px] sm:w-[540px]">
                 <SheetHeader>
                     <SheetTitle>Notifications.</SheetTitle>
-                    <SheetDescription className='text-sm text-slate-400'>{notifications?.length <= 0 && `You have no notifications for past 30days`}</SheetDescription>
+                    <SheetDescription className='text-sm text-slate-400'>{notifications?.length <= 0 && `You have no notifications from past 30days`}</SheetDescription>
                 </SheetHeader>
                 <div className="flex flex-col space-y-2 h-full overflow-y-scroll py-3">
                     {notifications?.map((notification: any) => (
