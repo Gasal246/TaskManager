@@ -2,7 +2,7 @@
 import { Badge } from '@/components/ui/badge'
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
 import { Avatar, ConfigProvider, Popconfirm, Space, Timeline, Tooltip } from 'antd'
-import { Edit, FilePlus2, FileText, Globe2, LockKeyhole, Menu, Send, Trash2 } from 'lucide-react'
+import { Circle, CircleCheckBig, CircleX, Edit, FilePlus2, FileText, Globe2, LockKeyhole, Menu, Send, Trash2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import React, { useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger, } from "@/components/ui/tabs";
@@ -13,6 +13,8 @@ import AddProjectDocDialog from '@/components/staff/AddProjectDocDialog'
 import LoaderSpin from '@/components/shared/LoaderSpin'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import CompleteProjectDialog from '@/components/admin/CompleteProjectDialog'
+import RollbackProjectDialog from '@/components/admin/RollbackProjectDialog'
 
 const ProjectIdPage = ({ params }: { params: { projectid: string } }) => {
     const router = useRouter();
@@ -39,8 +41,8 @@ const ProjectIdPage = ({ params }: { params: { projectid: string } }) => {
                     </div>
                 </div>
                 <div className="flex gap-2 items-center">
-                    <Button>Complete / Post</Button>
-                    <Button>Rollback / Issue</Button>
+                    <CompleteProjectDialog trigger={<Button>Complete / Post</Button>} />
+                    <RollbackProjectDialog trigger={<Button>Rollback / Issue</Button>} prevDepId='' />
                     {/* Delete Button Only for Admin  */}
                     <Popconfirm title="Delete Project" description="Are you sure want to schedule it for deletion ?"><Button className='bg-red-700 hover:bg-transparent hover:border-2 border-red-700 text-white'>Delete / Archive</Button></Popconfirm>
                 </div>
@@ -150,7 +152,8 @@ const ProjectIdPage = ({ params }: { params: { projectid: string } }) => {
                                 theme={{
                                     components: {
                                         Timeline: {
-                                            tailColor: 'grey'
+                                            tailColor: 'grey',
+                                            dotBg: 'transparent'
                                         },
                                     },
                                 }}
@@ -158,6 +161,8 @@ const ProjectIdPage = ({ params }: { params: { projectid: string } }) => {
                                     mode={'right'}
                                     items={[
                                         {
+                                            color: 'green',
+                                            dot: <CircleCheckBig className='p-1'/>,
                                             label: <div className='bg-neutral-700/40 p-2 rounded-lg flex gap-4 items-center'>
                                                 <div>
                                                     <div className="flex gap-1 justify-start">
@@ -174,6 +179,8 @@ const ProjectIdPage = ({ params }: { params: { projectid: string } }) => {
                                             </div>,
                                         },
                                         {
+                                            color: 'red',
+                                            dot: <CircleX className='p-[3px]' />,
                                             label: <div className='bg-neutral-700/40 p-2 rounded-lg flex gap-4 items-center'>
                                                 <div>
                                                     <div className="flex gap-1 justify-start">
@@ -190,6 +197,8 @@ const ProjectIdPage = ({ params }: { params: { projectid: string } }) => {
                                             </div>,
                                         },
                                         {
+                                            color: 'blue',
+                                            dot: <Circle className='p-1' />,
                                             label: <></>,
                                             children: <div className='text-xs flex gap-1 justify-end text-cyan-300'>Working Branch.. <LoaderSpin size={20} /></div>,
                                         },
