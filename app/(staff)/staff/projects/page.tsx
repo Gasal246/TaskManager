@@ -1,65 +1,260 @@
 "use client"
-import { Menu } from 'lucide-react'
 import React from 'react'
+import { ArrowUpWideNarrow, Circle, Dot, FilePlus, Menu, SortAsc, SortDesc, Trash2 } from 'lucide-react'
 import { Popover, PopoverContent, PopoverTrigger, } from "@/components/ui/popover";
 import { motion } from 'framer-motion';
-import { Avatar, Tooltip } from 'antd';
+import { Avatar, Badge, ConfigProvider, GetProps, Input, Popconfirm, Tooltip } from 'antd';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from "@/components/ui/progress"
 import Link from 'next/link';
-import AddProjectDialog from '@/components/staff/AddProjectDialog';
+import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import AddProjectDialog from '@/components/shared/AddProjectDialog';
+
+
+type SearchProps = GetProps<typeof Input.Search>;
 
 const ProjectsPage = () => {
+  const { Search } = Input;
+  const router = useRouter();
+  const handleSearch: SearchProps['onSearch'] = async (value, _e, info) => {
+    console.log(info?.source, value)
+  }
+
+  const handleDeleteProject = async (projectid: string) => {
+    // SOFT DELETE PROJECT AND DELETE PERMENENTLY AFTER 7DAYS
+  }
   return (
     <div className='p-4'>
-      <div className="flex justify-between mb-4">
-        <h1 className='font-semibold'>Your Projects</h1>
+      <div className="flex justify-between bg-slate-950/50 p-3 rounded-lg items-center">
+        <h1 className='font-bold'>Project Management</h1>
+        
         <Popover>
-          <PopoverTrigger><Tooltip title="Project Actions"><Menu /></Tooltip></PopoverTrigger>
-          <PopoverContent className='w-[120px] p-1 space-y-1'>
-            <AddProjectDialog trigger={
-              <motion.h1 whileTap={{ scale: 0.98 }} className='w-full bg-slate-700 hover:bg-slate-800 rounded-sm p-1 text-sm flex gap-1 items-center justify-center cursor-pointer'> Create Project </motion.h1>
-            } />
+          <PopoverTrigger className='p-2 bg-slate-600 rounded-lg hover:bg-slate-700 cursor-pointer'><ArrowUpWideNarrow /></PopoverTrigger>
+          <PopoverContent className='w-[140px] p-1 mr-3'>
+            <div className="flex flex-col gap-1">
+              <h4 className='flex items-center justify-between text-sm text-black bg-neutral-100 p-1 px-2 rounded-sm font-medium hover:bg-neutral-300 cursor-pointer'>High Priority <SortAsc color='black' /></h4>
+              <h4 className='flex items-center justify-between text-sm text-black bg-neutral-100 p-1 px-2 rounded-sm font-medium hover:bg-neutral-300 cursor-pointer'>Low Priority <SortDesc color='black' /></h4>
+            </div>
           </PopoverContent>
         </Popover>
       </div>
-      <Tabs defaultValue="ongoing" className="w-full">
-        <TabsList className='flex-wrap h-[80px] md:flex-nowrap md:h-auto w-[360px] lg:w-auto'>
-          <TabsTrigger value="new">New Projects</TabsTrigger>
-          <TabsTrigger value="ongoing">Ongoing</TabsTrigger>
-          <TabsTrigger value="owned">Owned</TabsTrigger>
-          <TabsTrigger value="completed">Completed</TabsTrigger>
-          <TabsTrigger value="deleted">Deleted</TabsTrigger>
-        </TabsList>
-        <TabsContent value="new">New Projects here.</TabsContent>
-        <TabsContent value="ongoing" className='w-full'>
-          <div className="flex flex-wrap">
-            <div className="w-full lg:w-3/12 p-1">
-              <Link href={`/staff/projects/1234`}>
-                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }} className="bg-slate-900 border border-slate-700 p-2 rounded-md shadow-md">
-                  <h2 className='font-medium mb-1'>Project Name</h2>
-                  <Tooltip title="Project Creator" placement='topLeft'>
-                    <div className="flex gap-1 items-center mb-1">
-                      <Avatar src="/avatar.png" size={25} />
-                      <div>
-                        <h1 className="text-xs font-medium leading-3">Creator Name</h1>
-                        <h1 className="text-xs">creator@email.com</h1>
-                      </div>
+      <div className="bg-slate-950/50 p-3 rounded-lg mt-3">
+        <div className='mb-5 flex justify-between flex-wrap'>
+          <ConfigProvider
+            theme={{
+              token: { colorTextPlaceholder: 'gray' },
+            }}
+          ><Search placeholder="search projects" onSearch={handleSearch} className='w-full lg:w-1/2' /></ConfigProvider>
+          <AddProjectDialog trigger={<Button className='font-medium text-sm flex items-center gap-1 bg-neutral-300'>Add Project <FilePlus size={18} /></Button>} />
+        </div>
+
+        <Tabs defaultValue="new" className="w-full">
+          <TabsList className="grid w-full grid-cols-5 gap-1 border border-slate-700">
+            <div className='px-2'><Badge count={1} size='small' className='w-full text-neutral-400 '><TabsTrigger value="new" className='flex items-center gap-3 w-full border border-slate-950'>New Projects</TabsTrigger></Badge></div>
+            <div className='px-2'><TabsTrigger value="ongoing" className='flex items-center gap-3 w-full border border-slate-950'>Ongoing Projects</TabsTrigger></div>
+            <div className='px-2'><TabsTrigger value="owned" className='flex items-center gap-3 w-full border border-slate-950'>Owned Projects</TabsTrigger></div>
+            <div className='px-2'><TabsTrigger value="deleted" className='flex items-center gap-3 w-full border border-slate-950'>Deleted Projects</TabsTrigger></div>
+            <div className='px-2'><TabsTrigger value="ended" className='flex items-center gap-3 w-full border border-slate-950'>Ended Projects</TabsTrigger></div>
+          </TabsList>
+          <TabsContent value="new">
+            <Card className='border-slate-700'>
+              <CardHeader className='p-3 px-4'><CardTitle>Newest Projects</CardTitle></CardHeader>
+              <CardContent className="p-3 w-full flex flex-wrap">
+                <div className="w-full lg:w-4/12 p-1">
+                  <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={() => router.push('/staff/projects/projectid')} className="bg-neutral-700/70 p-3 rounded-lg cursor-pointer select-none">
+                    <div className="flex justify-between px-1">
+                      <h1 className='text-sm font-medium'>Project Name</h1>
+                      <Popconfirm title="Delete this project?" description="deleted projects will be in your trash for 7days, and deleted permenently." onConfirm={() => handleDeleteProject('123')}><motion.div whileHover={{ rotate: -35 }}><Trash2 color='red' size={18} /></motion.div></Popconfirm>
                     </div>
-                  </Tooltip>
-                  <p className='text-xs mb-1'>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Lorem ipsum dolor sit amet. Lorem, ipsum dolor. Error vel tenetur corrupti aliquid inventore voluptatum impedit itaque incidunt ut illo...</p>
-                  <div className="flex justify-between items-center">
-                    <h3 className='text-xs text-slate-400'>just now</h3>
-                    <h3 className='px-3 p-1 bg-slate-800 rounded-full text-xs'>aprooved</h3>
-                  </div>
-                </motion.div>
-              </Link>
-            </div>
-          </div>
-        </TabsContent>
-        <TabsContent value="owned">The Projects You Owned here.</TabsContent>
-        <TabsContent value="completed">All The Completed Projects here.</TabsContent>
-        <TabsContent value="deleted">Your Deleted Projects here.</TabsContent>
-      </Tabs>
+                    <Link href={`/staff/profile/${'staffid'}`}><div className="flex gap-1 bg-slate-950/50 p-2 rounded-lg items-center mt-2 mb-1">
+                      <Avatar src="/avatar.png" size={26} />
+                      <div>
+                        <h1 className='text-xs font-medium leading-3'>Creator Name</h1>
+                        <h1 className='text-xs'>creator@gmail.com</h1>
+                      </div>
+                    </div></Link>
+                    <div className='flex justify-between gap-1 mb-1'>
+                      <Tooltip title="2023-12-06"><div className='bg-slate-950/60 p-1 px-2 rounded-lg w-1/2'>
+                        <h2 className='text-neutral-300 text-[11px] leading-3'>Created On</h2>
+                        <h2 className='text-slate-300 text-[10px]'>just now</h2>
+                      </div></Tooltip>
+                      <Tooltip title="2023-12-06"><div className='bg-slate-950/60 p-1 px-2 rounded-lg w-1/2'>
+                        <h2 className='text-neutral-300 text-[11px] leading-3'>Created On</h2>
+                        <h2 className='text-slate-300 text-[10px]'>just now</h2>
+                      </div></Tooltip>
+                    </div>
+                    <div className='px-2 mb-2'>
+                      <h2 className='text-xs text-red-400 flex items-center gap-1 font-medium'><Circle size={10} fill="" strokeWidth={5} />HIGH priority</h2>
+                      <h2 className='text-xs text-orange-400 flex items-center gap-1 font-medium'><Circle size={10} fill="" strokeWidth={5} />waiting approval</h2>
+                    </div>
+                    <div className='flex gap-1 items-center'>
+                      <Progress value={67} /> <span className='text-xs'>67%</span>
+                    </div>
+                  </motion.div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          <TabsContent value="ongoing">
+            <Card className='border-slate-700'>
+              <CardHeader className='p-3'><CardTitle>Ongoing Projects</CardTitle></CardHeader>
+              <CardContent className="p-3 w-full flex flex-wrap">
+                <div className="w-full lg:w-4/12 p-1">
+                  <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="bg-neutral-700/70 p-3 rounded-lg cursor-pointer select-none">
+                    <div className="flex justify-between px-1">
+                      <h1 className='text-sm font-medium'>Project Name</h1>
+                      <Popconfirm title="Delete this project?" description="deleted projects will be in your trash for 7days, and deleted permenently." onConfirm={() => handleDeleteProject('123')}><motion.div whileHover={{ rotate: -35 }}><Trash2 color='red' size={18} /></motion.div></Popconfirm>
+                    </div>
+                    <Link href={`/staff/profile/${'staffid'}`}><div className="flex gap-1 bg-slate-950/50 p-2 rounded-lg items-center mt-2 mb-1">
+                      <Avatar src="/avatar.png" size={26} />
+                      <div>
+                        <h1 className='text-xs font-medium leading-3'>Creator Name</h1>
+                        <h1 className='text-xs'>creator@gmail.com</h1>
+                      </div>
+                    </div></Link>
+                    <div className='flex justify-between gap-1 mb-1'>
+                      <Tooltip title="2023-12-06"><div className='bg-slate-950/60 p-1 px-2 rounded-lg w-1/2'>
+                        <h2 className='text-neutral-300 text-[11px] leading-3'>Created On</h2>
+                        <h2 className='text-slate-300 text-[10px]'>just now</h2>
+                      </div></Tooltip>
+                      <Tooltip title="2023-12-06"><div className='bg-slate-950/60 p-1 px-2 rounded-lg w-1/2'>
+                        <h2 className='text-neutral-300 text-[11px] leading-3'>Created On</h2>
+                        <h2 className='text-slate-300 text-[10px]'>just now</h2>
+                      </div></Tooltip>
+                    </div>
+                    <div className='px-2 mb-2'>
+                      <h2 className='text-xs text-red-400 flex items-center gap-1 font-medium'><Circle size={10} fill="" strokeWidth={5} />HIGH priority</h2>
+                      <h2 className='text-xs text-orange-400 flex items-center gap-1 font-medium'><Circle size={10} fill="" strokeWidth={5} />waiting approval</h2>
+                    </div>
+                    <div className='flex gap-1 items-center'>
+                      <Progress value={67} /> <span className='text-xs'>67%</span>
+                    </div>
+                  </motion.div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          <TabsContent value="owned">
+            <Card className='border-slate-700'>
+              <CardHeader className='p-3'><CardTitle>Owned Projects</CardTitle></CardHeader>
+              <CardContent className="p-3 w-full flex flex-wrap">
+                <div className="w-full lg:w-4/12 p-1">
+                  <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="bg-neutral-700/70 p-3 rounded-lg cursor-pointer select-none">
+                    <div className="flex justify-between px-1">
+                      <h1 className='text-sm font-medium'>Project Name</h1>
+                      <Popconfirm title="Delete this project?" description="deleted projects will be in your trash for 7days, and deleted permenently." onConfirm={() => handleDeleteProject('123')}><motion.div whileHover={{ rotate: -35 }}><Trash2 color='red' size={18} /></motion.div></Popconfirm>
+                    </div>
+                    <Link href={`/staff/profile/${'staffid'}`}><div className="flex gap-1 bg-slate-950/50 p-2 rounded-lg items-center mt-2 mb-1">
+                      <Avatar src="/avatar.png" size={26} />
+                      <div>
+                        <h1 className='text-xs font-medium leading-3'>Creator Name</h1>
+                        <h1 className='text-xs'>creator@gmail.com</h1>
+                      </div>
+                    </div></Link>
+                    <div className='flex justify-between gap-1 mb-1'>
+                      <Tooltip title="2023-12-06"><div className='bg-slate-950/60 p-1 px-2 rounded-lg w-1/2'>
+                        <h2 className='text-neutral-300 text-[11px] leading-3'>Created On</h2>
+                        <h2 className='text-slate-300 text-[10px]'>just now</h2>
+                      </div></Tooltip>
+                      <Tooltip title="2023-12-06"><div className='bg-slate-950/60 p-1 px-2 rounded-lg w-1/2'>
+                        <h2 className='text-neutral-300 text-[11px] leading-3'>Created On</h2>
+                        <h2 className='text-slate-300 text-[10px]'>just now</h2>
+                      </div></Tooltip>
+                    </div>
+                    <div className='px-2 mb-2'>
+                      <h2 className='text-xs text-red-400 flex items-center gap-1 font-medium'><Circle size={10} fill="" strokeWidth={5} />HIGH priority</h2>
+                      <h2 className='text-xs text-orange-400 flex items-center gap-1 font-medium'><Circle size={10} fill="" strokeWidth={5} />waiting approval</h2>
+                    </div>
+                    <div className='flex gap-1 items-center'>
+                      <Progress value={67} /> <span className='text-xs'>67%</span>
+                    </div>
+                  </motion.div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          <TabsContent value="deleted">
+            <Card className='border-slate-700'>
+              <CardHeader className='p-3'><CardTitle>Deleted Projects</CardTitle></CardHeader>
+              <CardContent className="p-3 w-full flex flex-wrap">
+                <div className="w-full lg:w-4/12 p-1">
+                  <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="bg-neutral-700/70 p-3 rounded-lg cursor-pointer select-none">
+                    <div className="flex justify-between px-1">
+                      <h1 className='text-sm font-medium'>Project Name</h1>
+                      <Popconfirm title="Delete this project?" description="deleted projects will be in your trash for 7days, and deleted permenently." onConfirm={() => handleDeleteProject('123')}><motion.div whileHover={{ rotate: -35 }}><Trash2 color='red' size={18} /></motion.div></Popconfirm>
+                    </div>
+                    <Link href={`/staff/profile/${'staffid'}`}><div className="flex gap-1 bg-slate-950/50 p-2 rounded-lg items-center mt-2 mb-1">
+                      <Avatar src="/avatar.png" size={26} />
+                      <div>
+                        <h1 className='text-xs font-medium leading-3'>Creator Name</h1>
+                        <h1 className='text-xs'>creator@gmail.com</h1>
+                      </div>
+                    </div></Link>
+                    <div className='flex justify-between gap-1 mb-1'>
+                      <Tooltip title="2023-12-06"><div className='bg-slate-950/60 p-1 px-2 rounded-lg w-1/2'>
+                        <h2 className='text-neutral-300 text-[11px] leading-3'>Created On</h2>
+                        <h2 className='text-slate-300 text-[10px]'>just now</h2>
+                      </div></Tooltip>
+                      <Tooltip title="2023-12-06"><div className='bg-slate-950/60 p-1 px-2 rounded-lg w-1/2'>
+                        <h2 className='text-neutral-300 text-[11px] leading-3'>Created On</h2>
+                        <h2 className='text-slate-300 text-[10px]'>just now</h2>
+                      </div></Tooltip>
+                    </div>
+                    <div className='px-2 mb-2'>
+                      <h2 className='text-xs text-red-400 flex items-center gap-1 font-medium'><Circle size={10} fill="" strokeWidth={5} />HIGH priority</h2>
+                      <h2 className='text-xs text-orange-400 flex items-center gap-1 font-medium'><Circle size={10} fill="" strokeWidth={5} />waiting approval</h2>
+                    </div>
+                    <div className='flex gap-1 items-center'>
+                      <Progress value={67} /> <span className='text-xs'>67%</span>
+                    </div>
+                  </motion.div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          <TabsContent value="ended">
+            <Card className='border-slate-700'>
+              <CardHeader className='p-3'><CardTitle>Deleted Projects</CardTitle></CardHeader>
+              <CardContent className="p-3 w-full flex flex-wrap">
+                <div className="w-full lg:w-4/12 p-1">
+                  <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="bg-neutral-700/70 p-3 rounded-lg cursor-pointer select-none">
+                    <div className="flex justify-between px-1">
+                      <h1 className='text-sm font-medium'>Project Name</h1>
+                      <Popconfirm title="Delete this project?" description="deleted projects will be in your trash for 7days, and deleted permenently." onConfirm={() => handleDeleteProject('123')}><motion.div whileHover={{ rotate: -35 }}><Trash2 color='red' size={18} /></motion.div></Popconfirm>
+                    </div>
+                    <Link href={`/staff/profile/${'staffid'}`}><div className="flex gap-1 bg-slate-950/50 p-2 rounded-lg items-center mt-2 mb-1">
+                      <Avatar src="/avatar.png" size={26} />
+                      <div>
+                        <h1 className='text-xs font-medium leading-3'>Creator Name</h1>
+                        <h1 className='text-xs'>creator@gmail.com</h1>
+                      </div>
+                    </div></Link>
+                    <div className='flex justify-between gap-1 mb-1'>
+                      <Tooltip title="2023-12-06"><div className='bg-slate-950/60 p-1 px-2 rounded-lg w-1/2'>
+                        <h2 className='text-neutral-300 text-[11px] leading-3'>Created On</h2>
+                        <h2 className='text-slate-300 text-[10px]'>just now</h2>
+                      </div></Tooltip>
+                      <Tooltip title="2023-12-06"><div className='bg-slate-950/60 p-1 px-2 rounded-lg w-1/2'>
+                        <h2 className='text-neutral-300 text-[11px] leading-3'>Created On</h2>
+                        <h2 className='text-slate-300 text-[10px]'>just now</h2>
+                      </div></Tooltip>
+                    </div>
+                    <div className='px-2 mb-2'>
+                      <h2 className='text-xs text-red-400 flex items-center gap-1 font-medium'><Circle size={10} fill="" strokeWidth={5} />HIGH priority</h2>
+                      <h2 className='text-xs text-orange-400 flex items-center gap-1 font-medium'><Circle size={10} fill="" strokeWidth={5} />waiting approval</h2>
+                    </div>
+                    <div className='flex gap-1 items-center'>
+                      <Progress value={67} /> <span className='text-xs'>67%</span>
+                    </div>
+                  </motion.div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   )
 }

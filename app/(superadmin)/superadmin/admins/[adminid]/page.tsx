@@ -53,7 +53,7 @@ const AdminPage = ({ params }: { params: { adminid: string } }) => {
     }
   }
 
-  const handleDeleteDocument = async (docId: string, docUrl: string) => {
+  const handleDeleteDocument = async ( docId: string, docUrl: string) => {
     const formData = new FormData();
     formData.append('adminId', adminData?._id);
     formData.append('docId', docId);
@@ -208,7 +208,7 @@ const AdminPage = ({ params }: { params: { adminid: string } }) => {
           <div className="w-full lg:w-3/12 p-1" key={doc?._id}>
             <div className="bg-slate-900 border border-slate-600 p-2 w-full rounded-md">
               <div className="flex justify-between items-center">
-                <h1 className="text-sm font-medium">{doc?.DocName}</h1>
+              <Link href={doc?.DocUrl} target='_blank' className='w-full '><h1 className="text-sm font-medium">{doc?.DocName}</h1></Link>
                 <Popconfirm title="Delete Document" description="Are you sure want to delete this company document ?" onConfirm={() => handleDeleteDocument(doc?._id, doc?.DocUrl)}><motion.div whileHover={{ rotate: -30, scale: 1.05 }} whileTap={{ scale: 0.98 }} className="text-red-700"><Trash2 size={20} /></motion.div></Popconfirm>
               </div>
               <div className="flex justify-between mt-1 items-center">

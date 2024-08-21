@@ -1,14 +1,15 @@
 "use client"
 import { Button } from '@/components/ui/button'
-import { CalendarCheck, CalendarPlus, Circle, Trash2 } from 'lucide-react'
+import { CalendarCheck, CalendarPlus, Circle, Flag, LayoutList, Trash2 } from 'lucide-react'
 import React from 'react'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger, } from "@/components/ui/tabs"
-import { Avatar, Popconfirm } from 'antd';
+import { Avatar, Popconfirm, Tooltip } from 'antd';
 import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
+import { Progress } from '@/components/ui/progress'
 
 const TasksPage = () => {
     const router = useRouter();
@@ -42,13 +43,29 @@ const TasksPage = () => {
                                             <h1 className='font-semibold'>Task Name</h1>
                                             <Popconfirm title="Delete this Task?" description="Are you sure wanna delete this task." onConfirm={() => handleDeleteTask('123')}><motion.div whileHover={{ rotate: -35 }}><Trash2 color='red' size={18} /></motion.div></Popconfirm>
                                         </div>
-                                        <div className='px-2 mb-2'>
-                                            <h2 className='text-sm text-orange-300 flex items-center gap-1'><Circle size={10} fill="" strokeWidth={5} />priority HIGH</h2>
-                                            <h2 className='text-sm text-blue-300 flex items-center gap-1'><Circle size={10} fill="" strokeWidth={5} />5 Activities</h2>
-                                        </div>
-                                        <div className="flex gap-1 items-center">
+                                        <div className="flex gap-1 items-center p-1 mb-1">
                                             <Avatar src="/avatar.png" size={20} />
                                             <h1 className='text-xs font-medium text-neutral-200'>creator@gmail.com <span className='italic font-normal text-neutral-300'>&#x2022; just now</span></h1>
+                                        </div>
+                                        <div className='px-2 mb-2 flex gap-3'>
+                                            <Tooltip title="priority"><h2 className='text-sm text-red-400 border border-red-400 p-1 px-2 rounded-lg flex items-center gap-1 font-semibold'><Flag fill='tomato' size={12} />2 HIGH</h2></Tooltip>
+                                            <Tooltip title="activities"><h2 className='text-sm text-blue-300 border border-blue-300 p-1 px-2 rounded-lg flex items-center gap-1'><LayoutList size={12} fill='blue' />5</h2></Tooltip>
+                                        </div>
+                                        <div className="flex justify-between gap-1">
+                                            <div className='bg-slate-950/50 p-2 rounded-lg w-full'>
+                                                <h3 className='text-xs font-medium leading-3 text-slate-400'>created at</h3>
+                                                <h4 className='text-xs text-slate-200'>2024-12-06</h4>
+                                            </div>
+                                            <div className='bg-slate-950/50 p-2 rounded-lg w-full'>
+                                                <h3 className='text-xs font-medium leading-3 text-slate-400'>deadline on</h3>
+                                                <h4 className='text-xs text-slate-200'>2024-12-10</h4>
+                                            </div>
+                                            <div className='bg-slate-950/50 p-2 rounded-lg w-full flex justify-center items-center'>
+                                                <h3 className='text-xs font-medium leading-3 text-slate-400'>2 days</h3>
+                                            </div>
+                                        </div>
+                                        <div className='flex gap-1 items-center mt-2'>
+                                            <Progress value={67} /> <span className='text-xs'>67%</span>
                                         </div>
                                     </motion.div>
                                 </div>

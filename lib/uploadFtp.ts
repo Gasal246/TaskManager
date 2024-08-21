@@ -1,32 +1,28 @@
 import * as ftp from 'basic-ftp';
 import * as path from 'path';
-import fetch from 'node-fetch'; // Ensure to install node-fetch or use a similar library
+import { Readable } from 'stream';
 
 interface UploadOptions {
     userId: string;
-    fileType: "profile-images" | "user-docs" | "company-docs";
+    fileType: "user-profiles" | "user-docs" | "admin-docs" | "project-docs";
     fileName: string;
 }
 
-async function uploadBlobToFtp(blobUrl: string, options: UploadOptions): Promise<string | null> {
+async function uploadBlobToFtp(buffer: Buffer, options: UploadOptions): Promise<string | null> {
     const client = new ftp.Client();
     client.ftp.verbose = true;
     const remoteFilePath = `/${options.fileType}/${options.userId}/${options.fileName}`;
 
     try {
-        // Fetch the blob content
-        const response = await fetch(blobUrl);
-        if (!response.ok) {
-            throw new Error(`Failed to fetch blob: ${response.statusText}`);
-        }
-        const blobBuffer = await response.buffer(); // Get blob as a buffer
+        // Convert the buffer to a readable stream
+        const stream = Readable.from(buffer);
 
         // Connect to the FTP server
         await client.access({
             host: process.env.FTP_SERVER,
             port: Number(process.env.FTP_PORT),
             user: process.env.FTP_USER,
-            password: 'Wideline@123#',
+            password: process.env.FTP_PASSWORD,
             secure: false
         });
 
@@ -34,10 +30,10 @@ async function uploadBlobToFtp(blobUrl: string, options: UploadOptions): Promise
         const remoteDir = path.dirname(remoteFilePath);
         await client.ensureDir(remoteDir);
 
-        // Upload the blob content
-        await client.uploadFrom(Buffer.from(blobBuffer) as any, remoteFilePath);
+        // Upload the stream content
+        await client.uploadFrom(stream, remoteFilePath);
 
-        const fileUrl = `http://${process.env.FTP_SERVER}/${remoteFilePath}`;
+        const fileUrl = `http://${process.env.FTP_SERVER}/${process.env.FTP_NAME}${remoteFilePath}`;
 
         console.log("File Uploaded Successfully.");
         console.log("File Url: ", fileUrl);

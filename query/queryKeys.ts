@@ -36,5 +36,8 @@ export enum QUERY_KEYS {
     GET_COMPLETED_TASKS = "getCompletedTasks",
     GET_COMMENTS_BY_TASKID = "getCommentByTaskId",
     GET_CHOOSE_STAFFS = "getChooseStaffs",
-    GET_ALL_NOTIFICATIONS = "getNotificationsByUserId"
+    GET_ALL_NOTIFICATIONS = "getNotificationsByUserId",
+
+    // project keys
+    GET_ALL_PROJECTS = "getAllProjects",
 }

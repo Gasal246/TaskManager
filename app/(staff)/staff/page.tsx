@@ -1,86 +1,62 @@
 "use client"
 import { useFindUserById } from '@/query/client/userQueries';
-import { MoveRight, TrendingUp } from 'lucide-react';
+import { BellElectric, Contact, Globe2, LandPlot } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import React from 'react'
-import { motion } from 'framer-motion';
-import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent, } from "@/components/ui/chart"
-import { Bar, BarChart, CartesianGrid, XAxis } from "recharts"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, } from "@/components/ui/card"
-
-const chartConfig = {
-  desktop: {
-    label: "Projects",
-    color: "#2563eb",
-  },
-  mobile: {
-    label: "Tasks",
-    color: "#60a5fa",
-  },
-} satisfies ChartConfig
-
-const chartData = [
-  { month: "January", tasks: 186, projects: 80 },
-  { month: "February", tasks: 305, projects: 200 },
-  { month: "March", tasks: 237, projects: 120 },
-  { month: "April", tasks: 73, projects: 190 },
-  { month: "May", tasks: 209, projects: 130 },
-  { month: "June", tasks: 214, projects: 140 },
-  { month: "July", tasks: 56, projects: 78 },
-  { month: "August", tasks: 123, projects: 128 },
-  { month: "September", tasks: 89, projects: 200 },
-  { month: "October", tasks: 200, projects: 188 },
-  { month: "November", tasks: 183, projects: 221 },
-  { month: "December", tasks: 159, projects: 144 },
-]
+import { useRouter } from 'next/navigation';
+import UserDailyActivity from '@/components/charts/UserDailyActivity';
+import UserMonthlyActivity from '@/components/charts/UserMonthlyActivity';
+import TodoBox from '@/components/staff/TodoBox';
 
 const StaffHome = () => {
+  const router = useRouter();
   const { data: session }: any = useSession();
   const { data: userData, isLoading: userLoading } = useFindUserById(session?.user?.id);
   return (
     <div className='p-4'>
-      <h1>Hello, {userData?.Name}!</h1>
-      <div className="flex gap-2 flex-wrap">
-        <div className="w-full lg:w-2/12 bg-slate-800 p-5 rounded-md border border-slate-600">
-          <h1 className='flex items-center justify-between font-medium'>Tasks <motion.div whileHover={{ x: 5 }} className='bg-black px-2 rounded-md cursor-pointer'><MoveRight className='' /></motion.div></h1>
-          <h1 className='text-center text-[5em] font-bold'>0</h1>
-        </div>
-        <div className="w-full lg:w-2/12 bg-slate-800 p-5 rounded-md border border-slate-600">
-          <h1 className='flex items-center justify-between font-medium'>Projects <motion.div whileHover={{ x: 5 }} className='bg-black px-2 rounded-md cursor-pointer'><MoveRight className='' /></motion.div></h1>
-          <h1 className='text-center text-[5em] font-bold'>0</h1>
+      <div className="flex justify-between p-3 bg-slate-950/50 rounded-lg mb-3 items-center flex-wrap">
+        <h1>Hello, {userData?.Name}!</h1>
+        <div className="flex gap-2 flex-wrap">
+          <div className='border border-slate-700 rounded-lg p-1 px-2'>
+            <h1 className='text-xs font-medium flex items-center gap-1'><BellElectric size={14} /> Department</h1>
+            <h2 className='text-xs text-slate-300 text-center'>{userData?.Department ? userData?.Department?.DepartmentName : 'Not added to any department'}</h2>
+          </div>
+          <div className='border border-slate-700 rounded-lg p-1 px-2'>
+            <h1 className='text-xs font-medium flex items-center gap-1'><Contact size={14} /> Role</h1>
+            <h2 className='text-xs text-slate-300 capitalize text-center'>{userData?.Role ? userData?.Role : 'Staff'}</h2>
+          </div>
+          <div className='border border-slate-700 rounded-lg p-1 px-2'>
+            <h1 className='text-xs font-medium flex items-center gap-1'><Globe2 size={14} /> Region</h1>
+            <h2 className='text-xs text-slate-300 text-center'>{userData?.Region ? userData?.Region?.RegionName : 'No Region Added'}</h2>
+          </div>
+          <div className='border border-slate-700 rounded-lg p-1 px-2'>
+            <h1 className='text-xs font-medium flex items-center gap-1'><LandPlot size={14} /> Area</h1>
+            <h2 className='text-xs text-slate-300 text-center'>{userData?.Area ? userData?.Area?.Areaname : 'No Area Added'}</h2>
+          </div>
         </div>
       </div>
-      <div className='flex mt-3 flex-wrap'>
-        <Card className='bg-slate-900'>
-          <CardHeader>
-            <CardTitle>Total Activities - Year</CardTitle>
-            <CardDescription>January - December 2024</CardDescription>
-          </CardHeader>
-          <CardContent >
-            <ChartContainer config={chartConfig} className='min-h-[160px] lg:min-h-[200px] max-h-[250px]'>
-              <BarChart accessibilityLayer data={chartData}>
-                <CartesianGrid vertical={false} />
-                <XAxis
-                  dataKey="month"
-                  tickLine={false}
-                  tickMargin={10}
-                  axisLine={false}
-                  tickFormatter={(value) => value.slice(0, 3)}
-                />
-                <ChartTooltip
-                  cursor={false}
-                  content={<ChartTooltipContent indicator="dashed" />}
-                />
-                <Bar dataKey="projects" fill="var(--color-desktop)" radius={4} />
-                <Bar dataKey="tasks" fill="var(--color-mobile)" radius={4} />
-              </BarChart>
-            </ChartContainer>
-          </CardContent>
-          <CardFooter className="flex-col items-start gap-2 text-sm">
-            <div className="flex gap-2 font-medium leading-none">Progress of your tasks and projects 65% <TrendingUp className="h-4 w-4" /> </div>
-            <div className="leading-none text-muted-foreground"> Showing total progress for the last 6 months {/* make the month count by present  */} </div>
-          </CardFooter>
-        </Card>
+      <div className="bg-slate-950/50 p-3 rounded-lg flex gap-1 justify-between mb-3 lg:flex-nowrap flex-wrap">
+        <div onClick={() => router.push(`/staff/tasks`)} className="bg-slate-950/50 p-2 px-3 rounded-lg w-full lg:w-1/2 border hover:border-slate-700 border-slate-900 select-none cursor-pointer">
+          <h1 className='text-sm font-medium mb-1'>Your Tasks</h1>
+          <div className="flex gap-2">
+            <h1 className='lg:w-32 text-xs font-semibold p-1 px-3 border border-slate-500 rounded-lg'>New: 5</h1>
+            <h1 className='lg:w-32 text-xs font-semibold p-1 px-3 border border-slate-500 rounded-lg'>Ongoing: 5</h1>
+            <h1 className='lg:w-32 text-xs font-semibold p-1 px-3 border border-slate-500 rounded-lg'>Completed: 5</h1>
+          </div>
+        </div>
+        <div onClick={() => router.push(`/staff/projects`)} className="bg-slate-950/50 p-2 px-3 rounded-lg w-full lg:w-1/2 border hover:border-slate-700 border-slate-900 select-none cursor-pointer">
+          <h1 className='text-sm font-medium mb-1'>Your Projects</h1>
+          <div className="flex gap-2">
+            <h1 className='lg:w-32 text-xs font-semibold p-1 px-3 border border-slate-500 rounded-lg'>New: 5</h1>
+            <h1 className='lg:w-32 text-xs font-semibold p-1 px-3 border border-slate-500 rounded-lg'>Ongoing: 5</h1>
+            <h1 className='lg:w-32 text-xs font-semibold p-1 px-3 border border-slate-500 rounded-lg'>Completed: 5</h1>
+          </div>
+        </div>
+      </div>
+      <div className='flex mt-3 flex-wrap bg-slate-950/50 p-3 rounded-lg items-center justify-center gap-3'>
+        <TodoBox />
+        <UserMonthlyActivity />
+        <UserDailyActivity />
       </div>
     </div>
   )

@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { QUERY_KEYS } from "../queryKeys";
-import { addNewTask, deleteTask, editTask, findByMail, findUserById, getAcceptedTasks, getTaskComments, getCompletedTasks, getCreatedTasks, getNewTasks, getTaskById, sendEmailVerificationOtp, setupNewPassword, verifyOTP, addTaskComment, removeTaskComment, getChoosableStaffs, getAllNotifications, notificationInview } from "./fn/userFunctions";
+import { addNewTask, deleteTask, editTask, findByMail, findUserById, getAcceptedTasks, getTaskComments, getCompletedTasks, getCreatedTasks, getNewTasks, getTaskById, sendEmailVerificationOtp, setupNewPassword, verifyOTP, addTaskComment, removeTaskComment, getChoosableStaffs, getAllNotifications, notificationInview, resetPassword } from "./fn/userFunctions";
 
 export const useFindByMailId = () => {
     const queryClient = useQueryClient();
@@ -204,6 +204,18 @@ export const useNotificationInview = () => {
             })
             queryClient.invalidateQueries({
                 queryKey: [QUERY_KEYS.GET_ALL_NOTIFICATIONS, data?.ReceiverId]
+            })
+        }
+    })
+}
+
+export const useResetPassword = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (formData: FormData) => resetPassword(formData),
+        onSuccess: (data: any) => {
+            queryClient.invalidateQueries({
+                queryKey: [QUERY_KEYS.GET_USER_BY_ID, data?._id]
             })
         }
     })

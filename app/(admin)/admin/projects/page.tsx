@@ -1,14 +1,16 @@
 "use client"
 import React from 'react'
-import { ArrowUpWideNarrow, Circle, Dot, Menu, SortAsc, SortDesc, Trash2 } from 'lucide-react'
+import { ArrowUpWideNarrow, Circle, Dot, FilePlus, Menu, SortAsc, SortDesc, Trash2 } from 'lucide-react'
 import { Popover, PopoverContent, PopoverTrigger, } from "@/components/ui/popover";
 import { motion } from 'framer-motion';
 import { Avatar, Badge, ConfigProvider, GetProps, Input, Popconfirm, Tooltip } from 'antd';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from "@/components/ui/progress"
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import AddProjectDialog from '@/components/shared/AddProjectDialog';
 
 
 type SearchProps = GetProps<typeof Input.Search>;
@@ -27,7 +29,7 @@ const ProjectsPage = () => {
     <div className='p-4'>
       <div className="flex justify-between bg-slate-950/50 p-3 rounded-lg items-center">
         <h1 className='font-bold'>Project Management</h1>
-        {/* ADD PROJECT OPTION FOR STAFFS AND ADMIN IN COMMMON WAY HERE GOES BACK IN TIME HERE GO FOR MOSQUE */}
+        
         <Popover>
           <PopoverTrigger className='p-2 bg-slate-600 rounded-lg hover:bg-slate-700 cursor-pointer'><ArrowUpWideNarrow /></PopoverTrigger>
           <PopoverContent className='w-[140px] p-1 mr-3'>
@@ -39,12 +41,13 @@ const ProjectsPage = () => {
         </Popover>
       </div>
       <div className="bg-slate-950/50 p-3 rounded-lg mt-3">
-        <div className='mb-5'>
+        <div className='mb-5 flex justify-between flex-wrap'>
           <ConfigProvider
             theme={{
               token: { colorTextPlaceholder: 'gray' },
             }}
           ><Search placeholder="search projects" onSearch={handleSearch} className='w-full lg:w-1/2' /></ConfigProvider>
+          <AddProjectDialog trigger={<Button className='font-medium text-sm flex items-center gap-1 bg-neutral-300'>Add Project <FilePlus size={18} /></Button>} />
         </div>
 
         <Tabs defaultValue="new" className="w-full">

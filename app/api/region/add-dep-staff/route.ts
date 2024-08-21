@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
             return Response.json({ existing: true });
         }
         const region = await Regions.findById(regId, { RegionName: 1 });
-        const updatedStaff = await Users.findByIdAndUpdate(staffId, { Role: 'reg-staff', Region: regId }, { new: true });
+        const updatedStaff = await Users.findByIdAndUpdate(staffId, { Role: 'reg-staff', Region: regId, Department: depId }, { new: true });
         await sendNotification("Selected as Regional Staff", `Your current role has been updated to regional staff of ${region?.RegionName}.`, session?.user?.id, staffId, 'role-change');
         const staffid = new mongoose.Types.ObjectId(staffId);
         const updatedDep = await Departments.findByIdAndUpdate(depId, { $push: { Staffs: staffId } }, { new: true });

@@ -14,7 +14,7 @@ export async function POST(req: NextRequest){
             return new NextResponse("Not Authorised Request", { status: 400 })
         }
         const { depid, staffid } = await req.json();
-        const updatedUser = await Users.findByIdAndUpdate(staffid, { Role: 'dep-head'});
+        const updatedUser = await Users.findByIdAndUpdate(staffid, { Role: 'dep-head', Department: depid });
         const updatedDep = await Departments.findByIdAndUpdate(depid, { DepartmentHead: staffid });
         return Response.json(updatedDep);
     } catch (error) {

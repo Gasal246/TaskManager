@@ -1,5 +1,5 @@
 "use client"
-import { Avatar, Tooltip } from 'antd'
+import { Avatar, Popconfirm, Tooltip } from 'antd'
 import React from 'react'
 import { motion } from 'framer-motion'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -10,8 +10,10 @@ import { useGetAcceptedTasks, useGetCompletedTasks, useGetCreatedTasks, useGetNe
 import { useSession } from 'next-auth/react'
 import LoaderSpin from '@/components/shared/LoaderSpin'
 import { Popover, PopoverContent, PopoverTrigger, } from "@/components/ui/popover";
-import { Menu } from 'lucide-react'
+import { CalendarCheck, CalendarPlus, Flag, LayoutList, Menu, Trash2 } from 'lucide-react'
 import Image from 'next/image'
+import { Button } from '@/components/ui/button'
+import { Progress } from '@/components/ui/progress'
 
 const TasksPage = () => {
   const { data: session }: any = useSession();
@@ -21,18 +23,17 @@ const TasksPage = () => {
   const { data: createdTasks, isLoading: loadingCreatedTasks } = useGetCreatedTasks(session?.user?.id);
   const { data: completedTasks, isLoading: loadingCompletedTasks } = useGetCompletedTasks(session?.user?.id);
 
+  const handleDeleteTask = (taskid: string) => {
+
+  }
+
   return (
     <div className='p-4'>
-      <div className="flex items-center justify-between">
-        <h1 className='mb-2'>Your Tasks</h1>
-        <Popover>
-          <PopoverTrigger><Tooltip title="Click To Add New Task"><Menu /></Tooltip></PopoverTrigger>
-          <PopoverContent className='w-[120px] p-1 space-y-1'>
-            <Link href={`/staff/tasks/add-task`}><motion.button whileTap={{ scale: 0.98 }} className='w-full bg-slate-600 hover:bg-slate-700 rounded-sm p-1 text-sm flex gap-1 items-center justify-center'> Add New Task </motion.button></Link>
-          </PopoverContent>
-        </Popover>
+      <div className="flex items-center justify-between bg-slate-950/50 rounded-lg p-3 mb-3">
+        <h1 className='font-medium flex gap-1 items-center'><CalendarCheck size={18} /> Manage Tasks</h1>
+        <Button onClick={() => router.push(`/staff/tasks/add-task`)} className='flex gap-1'><CalendarPlus size={16} />New Task</Button>
       </div>
-      <Tabs defaultValue="accepted" className="w-full">
+      <Tabs defaultValue="accepted" className="w-full bg-slate-950/50 p-3 rounded-lg">
         <TabsList className='flex-wrap md:flex-none mb-2 h-[80px] md:h-10'>
           <TabsTrigger value="new" className='flex gap-2' disabled={loadingNewTasks}>{loadingNewTasks ? <LoaderSpin size={20} /> : <>New Tasks <Badge className={`${newTasks?.length <= 0 && 'bg-slate-500'}`}>{newTasks?.length}</Badge></>}</TabsTrigger>
           <TabsTrigger value="accepted" disabled={loadingAcceptedTasks}>{loadingAcceptedTasks ? <LoaderSpin size={20} /> : 'Accepted Tasks'}</TabsTrigger>
@@ -42,38 +43,45 @@ const TasksPage = () => {
         <TabsContent value="new">
           <div className='w-full'>
             <h1 className="text-sm pl-1 my-1">{newTasks?.length > 0 ? 'Latest Tasks:' : "you don't have any new tasks."}</h1>
-            {newTasks?.length <= 0 &&
+            {/* {newTasks?.length <= 0 &&
               <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} animate={{ scale: 1.2 }} className='w-full flex justify-center items-center h-[55dvh]'>
                 <Image src={`/icons/noresults.png`} alt='noresults' width={200} height={200} className='opacity-70' />
-              </motion.div>}
+              </motion.div>} */}
             <div className="flex flex-wrap">
-              {
-                newTasks?.map((task: any) => (
-                  <div className="w-full lg:w-3/12 p-1" key={task?._id}>
-                    <Tooltip title="Click To Open This Task">
-                      <Link href={`/staff/tasks/${task?._id}`}>
-                        <motion.div whileTap={{ scale: 0.98 }} className="bg-slate-800 border border-slate-600 p-2 rounded-md cursor-pointer shadow-md hover:shadow-lg">
-                          <div className="flex gap-1 items-center">
-                            <h1>{task?.TaskName}</h1>
-                            <h2 className='text-xs text-slate-400'>. just now</h2>
-                          </div>
-                          <div className='mt-1'>
-                            <h1 className='text-xs text-slate-400'>from:</h1>
-                            <div className="flex gap-1 items-center mb-1">
-                              <Avatar src={task?.Creator?.AvatarUrl || '/avatar.png'} />
-                              <div>
-                                <h3 className='text-xs leading-3 font-medium flex gap-1 items-center'>{task?.Creator?.Name} <Badge className={`p-0 px-2 ${task?.Priority === 'high' ? 'bg-red-300' : (task?.Priority == 'average' ? 'bg-slate-100' : 'bg-slate-400')} text-[10px] font-bold`}>priority: {task?.Priority}</Badge></h3>
-                                <h3 className='text-xs '>{task?.Creator?.Email}</h3>
-                              </div>
-                            </div>
-                            <p className='text-xs text-slate-300'>{task?.Description}<i className='text-slate-400 text-nowrap'>open to view full</i></p>
-                          </div>
-                        </motion.div>
-                      </Link>
-                    </Tooltip>
-                  </div>
-                ))
-              }
+              <div className="w-full lg:w-4/12 p-1">
+                <Tooltip title="Click To Open This Task">
+                  <motion.div onClick={() => router.push(`/staff/tasks/taskid`)} whileTap={{ scale: 0.98 }} className="p-2 rounded-lg bg-neutral-800/90 border border-neutral-800 hover:border-neutral-600 select-none cursor-pointer">
+                    <div className="flex justify-between items-center px-1 mb-1">
+                      <h1 className='font-semibold'>Task Name</h1>
+                      <Popconfirm title="Delete this Task?" description="Are you sure wanna delete this task." onConfirm={() => handleDeleteTask('123')}><motion.div whileHover={{ rotate: -35 }}><Trash2 color='red' size={18} /></motion.div></Popconfirm>
+                    </div>
+                    <div className="flex gap-1 items-center p-1 mb-1">
+                      <Avatar src="/avatar.png" size={20} />
+                      <h1 className='text-xs font-medium text-neutral-200'>creator@gmail.com <span className='italic font-normal text-neutral-300'>&#x2022; just now</span></h1>
+                    </div>
+                    <div className='px-2 mb-2 flex gap-3'>
+                      <Tooltip title="priority"><h2 className='text-sm text-red-400 border border-red-400 p-1 px-2 rounded-lg flex items-center gap-1 font-semibold'><Flag fill='tomato' size={12} />2 HIGH</h2></Tooltip>
+                      <Tooltip title="activities"><h2 className='text-sm text-blue-300 border border-blue-300 p-1 px-2 rounded-lg flex items-center gap-1'><LayoutList size={12} fill='blue' />5</h2></Tooltip>
+                    </div>
+                    <div className="flex justify-between gap-1">
+                      <div className='bg-slate-950/50 p-2 rounded-lg w-full'>
+                        <h3 className='text-xs font-medium leading-3 text-slate-400'>created at</h3>
+                        <h4 className='text-xs text-slate-200'>2024-12-06</h4>
+                      </div>
+                      <div className='bg-slate-950/50 p-2 rounded-lg w-full'>
+                        <h3 className='text-xs font-medium leading-3 text-slate-400'>deadline on</h3>
+                        <h4 className='text-xs text-slate-200'>2024-12-10</h4>
+                      </div>
+                      <div className='bg-slate-950/50 p-2 rounded-lg w-full flex justify-center items-center'>
+                        <h3 className='text-xs font-medium leading-3 text-slate-400'>2 days</h3>
+                      </div>
+                    </div>
+                    <div className='flex gap-1 items-center mt-2'>
+                      <Progress value={67} /> <span className='text-xs'>67%</span>
+                    </div>
+                  </motion.div>
+                </Tooltip>
+              </div>
             </div>
           </div>
         </TabsContent>
@@ -84,35 +92,6 @@ const TasksPage = () => {
               <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} animate={{ scale: 1.2 }} className='w-full flex justify-center items-center h-[55dvh]'>
                 <Image src={`/icons/noresults.png`} alt='noresults' width={200} height={200} className='opacity-70' />
               </motion.div>}
-            <div className="flex flex-wrap">
-              {
-                acceptedTasks?.map((task: any) => (
-                  <div className="w-full lg:w-3/12 p-1" key={task?._id}>
-                    <Tooltip title="Click To Open This Task">
-                      <Link href={`/staff/tasks/${task?._id}`}>
-                        <motion.div whileTap={{ scale: 0.98 }} className="bg-slate-800 border border-slate-600 p-2 rounded-md cursor-pointer shadow-md hover:shadow-lg">
-                          <div className="flex gap-1 items-center">
-                            <h1>{task?.TaskName}</h1>
-                            <h2 className='text-xs text-slate-400'>. just now</h2>
-                          </div>
-                          <div className='mt-1'>
-                            <h1 className='text-xs text-slate-400'>from:</h1>
-                            <div className="flex gap-1 items-center mb-1">
-                              <Avatar src={task?.Creator?.AvatarUrl || '/avatar.png'} />
-                              <div>
-                                <h3 className='text-xs leading-3 font-medium flex gap-1 items-center'>{task?.Creator?.Name} <Badge className={`p-0 px-2 ${task?.Priority === 'high' ? 'bg-red-300' : (task?.Priority == 'average' ? 'bg-slate-100' : 'bg-slate-400')} text-[10px] font-bold`}>priority: {task?.Priority}</Badge></h3>
-                                <h3 className='text-xs '>{task?.Creator?.Email}</h3>
-                              </div>
-                            </div>
-                            <p className='text-xs text-slate-300'>{task?.Description}<i className='text-slate-400 text-nowrap'>open to view full</i></p>
-                          </div>
-                        </motion.div>
-                      </Link>
-                    </Tooltip>
-                  </div>
-                ))
-              }
-            </div>
           </div>
         </TabsContent>
         <TabsContent value="forwarded">
@@ -122,35 +101,6 @@ const TasksPage = () => {
               <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} animate={{ scale: 1.2 }} className='w-full flex justify-center items-center h-[55dvh]'>
                 <Image src={`/icons/noresults.png`} alt='noresults' width={200} height={200} className='opacity-70' />
               </motion.div>}
-            <div className="flex flex-wrap">
-              {
-                createdTasks?.map((task: any) => (
-                  <div className="w-full lg:w-3/12 p-1" key={task?._id}>
-                    <Tooltip title="Click To Open This Task">
-                      <Link href={`/staff/tasks/${task?._id}`}>
-                        <motion.div whileTap={{ scale: 0.98 }} className="bg-slate-800 border border-slate-600 p-2 rounded-md cursor-pointer shadow-md hover:shadow-lg">
-                          <div className="flex gap-1 items-center">
-                            <h1>{task?.TaskName}</h1>
-                            <h2 className='text-xs text-slate-400'>. just now</h2>
-                          </div>
-                          <div className='mt-1'>
-                            <h1 className='text-xs text-slate-400'>from:</h1>
-                            <div className="flex gap-1 items-center mb-1">
-                              <Avatar src={task?.Creator?.AvatarUrl || '/avatar.png'} />
-                              <div>
-                                <h3 className='text-xs leading-3 font-medium flex gap-1 items-center'>{task?.Creator?.Name} <Badge className={`p-0 px-2 ${task?.Priority === 'high' ? 'bg-red-300' : (task?.Priority == 'average' ? 'bg-slate-100' : 'bg-slate-400')} text-[10px] font-bold`}>priority: {task?.Priority}</Badge></h3>
-                                <h3 className='text-xs '>{task?.Creator?.Email}</h3>
-                              </div>
-                            </div>
-                            <p className='text-xs text-slate-300'>{task?.Description}<i className='text-slate-400 text-nowrap'>open to view full</i></p>
-                          </div>
-                        </motion.div>
-                      </Link>
-                    </Tooltip>
-                  </div>
-                ))
-              }
-            </div>
           </div>
         </TabsContent>
         <TabsContent value="completed">
@@ -160,35 +110,6 @@ const TasksPage = () => {
               <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} animate={{ scale: 1.2 }} className='w-full flex justify-center items-center h-[55dvh]'>
                 <Image src={`/icons/noresults.png`} alt='noresults' width={200} height={200} className='opacity-70' />
               </motion.div>}
-            <div className="flex flex-wrap">
-              {
-                completedTasks?.map((task: any) => (
-                  <div className="w-full lg:w-3/12 p-1" key={task?._id}>
-                    <Tooltip title="Click To Open This Task">
-                      <Link href={`/staff/tasks/${task?._id}`}>
-                        <motion.div whileTap={{ scale: 0.98 }} className="bg-slate-800 border border-slate-600 p-2 rounded-md cursor-pointer shadow-md hover:shadow-lg">
-                          <div className="flex gap-1 items-center">
-                            <h1>{task?.TaskName}</h1>
-                            <h2 className='text-xs text-slate-400'>. just now</h2>
-                          </div>
-                          <div className='mt-1'>
-                            <h1 className='text-xs text-slate-400'>from:</h1>
-                            <div className="flex gap-1 items-center mb-1">
-                              <Avatar src={task?.Creator?.AvatarUrl || '/avatar.png'} />
-                              <div>
-                                <h3 className='text-xs leading-3 font-medium flex gap-1 items-center'>{task?.Creator?.Name} <Badge className={`p-0 px-2 ${task?.Priority === 'high' ? 'bg-red-300' : (task?.Priority == 'average' ? 'bg-slate-100' : 'bg-slate-400')} text-[10px] font-bold`}>priority: {task?.Priority}</Badge></h3>
-                                <h3 className='text-xs '>{task?.Creator?.Email}</h3>
-                              </div>
-                            </div>
-                            <p className='text-xs text-slate-300'>{task?.Description}<i className='text-slate-400 text-nowrap'>open to view full</i></p>
-                          </div>
-                        </motion.div>
-                      </Link>
-                    </Tooltip>
-                  </div>
-                ))
-              }
-            </div>
           </div>
         </TabsContent>
       </Tabs>

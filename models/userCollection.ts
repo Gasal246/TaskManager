@@ -2,8 +2,8 @@ import mongoose, { Schema, Document, ObjectId } from 'mongoose';
 
 export interface IUsers extends Document {
   _id: ObjectId;
-  Email: String;
-  Password: String;
+  Email: string;
+  Password: string;
   Name: String;
   Documents: {
      DocName: String | null;
@@ -15,6 +15,7 @@ export interface IUsers extends Document {
   Addedby: ObjectId | null;
   Region: ObjectId | null;
   Area: ObjectId | null;
+  Department: ObjectId | null;
   IsRegionalHead: Boolean | null;
   IsAreaHead: Boolean | null;
   InitialEntry: Boolean | null;
@@ -43,6 +44,7 @@ const UsersSchema: Schema = new Schema({
   Status: { type: String, enum: ['active', 'blocked', 'unverified']},
   Region: { type: Schema.Types.ObjectId, ref: "Regions" },
   Area: { type: Schema.Types.ObjectId, ref: "Areas" },
+  Department: { type: Schema.Types.ObjectId, ref: "Departments" },
   IsDeleted: { type: Boolean, default: false },
   Role: { type: String, enum: ['admin', 'staff', 'area-head', 'dep-head', 'region-head', 'dep-staff', 'reg-staff']}
 }, { timestamps: true });

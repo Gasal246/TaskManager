@@ -14,7 +14,11 @@ declare type NewAdminType = {
     [key: string]: any;
 }
 
-declare type AdminDataFilters = 'today' | 'month' | 'all' | 'days'
+declare type AdminDataFilters = 'today' | 'month' | 'all' | 'days';
+
+declare type ProjectGetFilters = 'all' | 'new' | 'ongoing' | 'deleted' | 'owned' | 'ended';
+
+declare type NotificationTypes = 'role-change' | 'project-queued' | 'password-changed';
 
 declare type AdminWithinDaysType = {
     from: string;

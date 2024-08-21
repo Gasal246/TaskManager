@@ -172,3 +172,12 @@ export async function notificationInview (notificationid: string){
         console.log(error);
     }
 }
+
+export async function resetPassword (formData: FormData){
+    try {
+        const res = await axios.post(`/api/users/update-password`, formData);
+        return res.data;
+    } catch (error) {
+        console.log(error);
+    }
+}

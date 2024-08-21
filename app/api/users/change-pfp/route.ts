@@ -2,9 +2,10 @@ import connectDB from "@/lib/mongo";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { authOptions } from "../../auth/[...nextauth]/route";
-import path from "path";
-import { promises as fs } from 'fs';
 import Users from "@/models/userCollection";
+import uploadBlobToFtp from "@/lib/uploadFtp"; // Assuming you placed the FTP upload function here
+import path from 'path'
+import deleteFTPfile from "@/lib/deleteFtp";
 
 connectDB();
 
@@ -17,36 +18,50 @@ export async function POST(req: NextRequest) {
     try {
         const session = await getServerSession(authOptions);
         if (!session) {
-            return new NextResponse("Not Authorised Request", { status: 401 })
+            return new NextResponse("Not Authorized Request", { status: 401 });
         }
+
         const formData = await req.formData();
         const body = Object.fromEntries(formData) as Body;
         const user = await Users.findById(body?.userid, { Email: 1, AvatarUrl: 1 });
-        if (user?.AvatarUrl) {
-            const filePath = path.join(process.cwd(), 'public', user?.AvatarUrl);
-            fs.unlink(filePath);
+
+        if (!user) {
+            return new NextResponse("User not found", { status: 404 });
         }
 
-        const baseUploadDir = path.join(process.cwd(), 'public', 'uploads', 'user-profiles');
-        const userUploadDir = path.join(baseUploadDir, user?.Email);
-        await fs.mkdir(userUploadDir, { recursive: true });
+        if (user?.AvatarUrl) {
+            const deleteExisting = await deleteFTPfile(user?.AvatarUrl);
+        }
 
         const file = formData.get('file') as File | null;
-        let docurl;
+        let docUrl: string | null = null;
+
         if (file) {
             const extension = path.extname(file.name);
-            const uniqueFileName = `${Date.now()}_${'pic'}${extension}`;
-            const relativeFilePath = path.join('uploads', 'user-profiles', user?.Email, uniqueFileName);
-            const newFilePath = path.join(baseUploadDir, user?.Email, uniqueFileName);
+            const uniqueFileName = `${Date.now()}_pic${extension}`;
 
-            // Cast Buffer to Uint8Array
+            // Convert file to buffer
             const buffer = Buffer.from(await file.arrayBuffer());
-            await fs.writeFile(newFilePath, new Uint8Array(buffer));
-            docurl = `/${relativeFilePath.replace(/\\/g, '/')}`
+
+            // Upload to FTP
+            docUrl = await uploadBlobToFtp(buffer, {
+                userId: user._id.toString(),
+                fileType: "user-profiles",
+                fileName: uniqueFileName,
+            });
+
+            if (!docUrl) {
+                return new NextResponse("Failed to upload file to FTP.", { status: 500 });
+            }
         }
 
-        const updatedUser = await Users.findByIdAndUpdate(body?.userid, { AvatarUrl: docurl });
-        return Response.json(updatedUser);
+        const updatedUser = await Users.findByIdAndUpdate(
+            body?.userid,
+            { AvatarUrl: docUrl },
+            { new: true }
+        );
+
+        return NextResponse.json(updatedUser);
     } catch (error) {
         console.log(error);
         return new NextResponse("Internal Server Error.", { status: 500 });
