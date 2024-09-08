@@ -24,6 +24,8 @@ import AddAdminDocumentsDialog from '@/components/super/AddAdminDocumentsDialog'
 import { AdminCountBoxSkelton, DepartmentsLoadingSkelton, ProfileInfoSkelton } from './skeletons'
 import ShowAdminUsers from '@/components/super/ShowAdminUsers'
 import AddMoreDepDialog from '@/components/super/AddMoreDepDialog'
+import { deleteObject, ref } from 'firebase/storage'
+import { storage } from '@/firebase/config'
 
 const AdminPage = ({ params }: { params: { adminid: string } }) => {
   const router = useRouter();
@@ -54,14 +56,20 @@ const AdminPage = ({ params }: { params: { adminid: string } }) => {
   }
 
   const handleDeleteDocument = async ( docId: string, docUrl: string) => {
-    const formData = new FormData();
-    formData.append('adminId', adminData?._id);
-    formData.append('docId', docId);
-    formData.append('docUrl', docUrl);
-    const response = await deleteAdminDoc(formData);
-    console.log(response);
-    if (response?._id) {
-      return toast.success('Admin Document Deleted.')
+    try {
+      const formData = new FormData();
+      formData.append('adminId', adminData?._id);
+      formData.append('docId', docId);
+      formData.append('docUrl', docUrl);
+      const fileRef = ref(storage, docUrl);
+      await deleteObject(fileRef);
+      const response = await deleteAdminDoc(formData);
+      if (response?._id) {
+        return toast.success('Admin Document Deleted.')
+      }
+    } catch (error) {
+      console.log(error);
+      return toast.error("Something went wrong on deleting document.")
     }
   }
 

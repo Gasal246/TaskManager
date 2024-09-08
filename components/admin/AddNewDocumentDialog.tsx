@@ -9,16 +9,19 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from "@/components/ui/input"
 import { useAddNewStaffDocument } from '@/query/client/adminQueries';
 import { toast } from 'sonner';
+import { deleteObject, getDownloadURL, ref, uploadBytes } from 'firebase/storage';
+import { storage } from '@/firebase/config';
 
 const formSchema = z.object({
     DocName: z.string().min(2),
-    ExpireAt: z.string().date(),
-    RemindAt: z.string().date(),
+    ExpireAt: z.string().date().optional(),
+    RemindAt: z.string().date().optional(),
 })
 
 const AddNewDocumentDialog = ({ trigger, staffid }: { trigger: React.ReactNode, staffid: string }) => {
+    const [loading, setLoading] = useState(false)
     const { mutateAsync: addNewDocument, isPending: addingNewDocument } = useAddNewStaffDocument();
-    const [ file, setFile ] = useState<File | null>(null);
+    const [file, setFile] = useState<File | null>(null);
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -29,17 +32,37 @@ const AddNewDocumentDialog = ({ trigger, staffid }: { trigger: React.ReactNode, 
     })
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
-        const formData = new FormData();
-        formData.append("DocName", values.DocName);
-        formData.append("ExpireAt", values.ExpireAt);
-        formData.append("RemindAt", values.RemindAt);
-        formData.append("Document", file as any);
-        formData.append("staffid", staffid);
-        const response = await addNewDocument({ formData });
-        if(response?.existing){
-            return toast.error("The Document with same name already exists.")
+        setLoading(true);
+        const documentRef = ref(storage, `user-docs/${staffid}/${Date.now() + "_" + values.DocName}`);
+        try {
+            await uploadBytes(documentRef, file as any);
+            const docUrl = await getDownloadURL(documentRef);
+            const formData = new FormData();
+            formData.append("DocName", values.DocName);
+            formData.append("ExpireAt", values.ExpireAt || '');
+            formData.append("RemindAt", values.RemindAt || '');
+            formData.append("Document", docUrl);
+            formData.append("staffid", staffid);
+            const response = await addNewDocument({ formData });
+            if (response?.existing) {
+                await deleteObject(documentRef);
+                return toast.error("The Document with same name already exists.");
+            } else if (response?._id) { return toast.success("Document added successfully.") }
+        } catch (error) {
+            console.log(error);
+            return toast.error("Something went wrong on adding new document.")
+        } finally {
+            setLoading(false);
         }
-        return toast.success("Document added successfully.")
+    }
+
+    const handleFileSelection = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]?.size > 500 * 1024) {
+            setFile(null);
+            return toast.error("File size exceeds 500KB.", { description: "Please select a smaller sized Document." });
+        } else {
+            setFile(e.target.files ? e.target.files[0] : null);
+        }
     }
 
     return (
@@ -90,8 +113,8 @@ const AddNewDocumentDialog = ({ trigger, staffid }: { trigger: React.ReactNode, 
                                 </FormItem>
                             )}
                         />
-                        <Input type="file" placeholder='select your document' onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)} />
-                        <Button disabled={addingNewDocument} type="submit">{addingNewDocument ? 'Adding...' : 'Submit'}</Button>
+                        <Input type="file" placeholder='select your document' onChange={(e) => handleFileSelection(e)} />
+                        {file && <Button disabled={loading} type="submit">{loading ? 'Adding...' : 'Submit'}</Button>}
                     </form>
                 </Form>
             </DialogContent>

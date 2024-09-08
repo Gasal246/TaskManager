@@ -5,9 +5,14 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { DashboardIcon } from '@radix-ui/react-icons'
 import { Bone, CalendarCheck, EarthIcon, PanelsTopLeft, SquareLibrary, UsersIcon } from 'lucide-react'
+import { Badge } from '../ui/badge'
+import { useGetAllProjectAnalytics } from '@/query/client/analyticsQueries'
+import { useSession } from 'next-auth/react'
 
 const AdminSidebar = () => {
-    const pathname = usePathname()
+    const { data: session }: any = useSession();
+    const pathname = usePathname();
+    const { data: projectsAnalytics, isLoading: loadingProjectAnalytics }: any = useGetAllProjectAnalytics(session?.user?.id, 'all');
     return (
         <div className={`w-full h-full dark:bg-slate-900 bg-slate-400 relative overflow-hidden`}>
             <Link href="/admin">
@@ -26,8 +31,8 @@ const AdminSidebar = () => {
                 </motion.button>
             </Link>
             <Link href="/admin/projects">
-                <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className={`${pathname.includes('/projects') ? 'dark:bg-cyan-950 bg-blue-400 border-b border-slate-700' : 'dark:bg-slate-800 bg-slate-50'} w-full p-2 font-medium text-start flex gap-2 items-center hover:border-b hover:border-slate-700`}>
-                <PanelsTopLeft size={18} /> Manage Projects
+                <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className={`${pathname.includes('/projects') ? 'dark:bg-cyan-950 bg-blue-400 border-b border-slate-700' : 'dark:bg-slate-800 bg-slate-50'} w-full p-2 font-medium text-start flex items-center justify-between hover:border-b hover:border-slate-700`}>
+                <div className="flex gap-2 items-center"><PanelsTopLeft size={18} /> Manage Projects</div> {projectsAnalytics?.unopenedProjects?.length > 0 && <Badge className='p-0 px-2'>{projectsAnalytics?.unopenedProjects?.length}</Badge>}
                 </motion.button>
             </Link>
             <Link href="/admin/tasks">

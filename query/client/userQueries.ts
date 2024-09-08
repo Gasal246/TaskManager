@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { QUERY_KEYS } from "../queryKeys";
-import { addNewTask, deleteTask, editTask, findByMail, findUserById, getAcceptedTasks, getTaskComments, getCompletedTasks, getCreatedTasks, getNewTasks, getTaskById, sendEmailVerificationOtp, setupNewPassword, verifyOTP, addTaskComment, removeTaskComment, getChoosableStaffs, getAllNotifications, notificationInview, resetPassword } from "./fn/userFunctions";
+import { addNewTask, deleteTask, editTask, findByMail, findUserById, getAcceptedTasks, getTaskComments, getCompletedTasks, getCreatedTasks, getNewTasks, getTaskById, sendEmailVerificationOtp, setupNewPassword, verifyOTP, addTaskComment, removeTaskComment, getChoosableStaffs, getAllNotifications, notificationInview, resetPassword, getUserRole } from "./fn/userFunctions";
 
 export const useFindByMailId = () => {
     const queryClient = useQueryClient();
@@ -169,7 +169,7 @@ export const useAddTaskComment = () => {
 export const useRemoveTaskComment = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: ({ taskid, commentid }:{taskid: string, commentid: string}) => removeTaskComment(taskid, commentid),
+        mutationFn: ({ taskid, commentid }: { taskid: string, commentid: string }) => removeTaskComment(taskid, commentid),
         onSuccess: (data: any) => {
             queryClient.invalidateQueries({
                 queryKey: [QUERY_KEYS.GET_TASK_BY_ID, data?._id]
@@ -220,3 +220,12 @@ export const useResetPassword = () => {
         }
     })
 }
+
+export const useGetUserRole = (userid: string) => {
+    return useQuery({
+        queryKey: [QUERY_KEYS.GET_USER_ROLE, userid],
+        queryFn: async () => await getUserRole(userid),
+        enabled: !!userid
+    })
+}
+

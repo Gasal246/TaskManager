@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ["picsum.photos", "theprivateapp.com"],
+    domains: ["picsum.photos", "theprivateapp.com", "firebasestorage.googleapis.com"],
   },
   typescript: {
     // !! WARN !!

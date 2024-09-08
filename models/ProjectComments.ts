@@ -2,7 +2,6 @@ import mongoose, { Schema, Document, ObjectId } from 'mongoose';
 
 export interface IProjectComments extends Document {
   _id: ObjectId;
-  ProjectId: ObjectId | null;
   Comment: String | null;
   Creator: ObjectId | null;
   createdAt: Date | null;

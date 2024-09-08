@@ -3,8 +3,6 @@ import Users from "@/models/userCollection";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { authOptions } from "../../auth/[...nextauth]/route";
-import fs from 'fs';
-import path from 'path';
 
 connectDB();
 
@@ -20,20 +18,10 @@ export async function POST(req: NextRequest) {
         if (!document) {
             return new NextResponse("Document not found", { status: 404 });
         }
-        const docUrl = document.DocUrl;
         const updatedUser = await Users.findByIdAndUpdate(
             { _id: staffid },
             { $pull: { Documents: { _id: docid } } }
         );
-        if (docUrl) {
-            const filePath = path.join(process.cwd(), 'public', docUrl);
-            fs.unlink(filePath, (err) => {
-                if (err) {
-                    console.error("Failed to delete file:", err);
-                }
-            });
-        }
-        console.log(updatedUser)
         return Response.json(updatedUser);
     } catch (error) {
         console.log(error);

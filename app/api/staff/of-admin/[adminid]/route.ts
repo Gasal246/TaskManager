@@ -28,4 +28,4 @@ export async function GET(req: NextRequest, { params }: { params: { adminid: str
     }
 }
 
-const dynamic = "force-dynamic";
+export const dynamic = "force-dynamic";

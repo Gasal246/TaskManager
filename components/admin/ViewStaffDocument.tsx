@@ -49,9 +49,9 @@ const ViewStaffDocument = ({ trigger, url, docName }: { trigger: React.ReactNode
                         </div>
                     }
                     {
-                        isPDF(url) &&
+                        isPDF(url) || !isImage(url) &&
                         <Link href={url} download>
-                            <h1 className='font-medium flex gap-1 hover:bg-white hover:text-black rounded-full px-3 p-1 cursor-pointer'><FileText /> Download {docName}</h1>
+                            <h1 className='font-medium flex gap-1 hover:bg-white hover:text-black rounded-full px-3 p-1 cursor-pointer'><FileText /> View & Dwd {docName}</h1>
                         </Link>
                     }
                 </DialogContent>

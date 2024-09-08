@@ -15,7 +15,7 @@ interface Body {
     adminId: string;
     expire: Date | string;
     remind: Date | string;
-    file: File | null;
+    docUrl: string;
     [key: string]: any; // For dynamic document properties
 }
 
@@ -35,42 +35,22 @@ export async function POST(req: NextRequest) {
             return new NextResponse("Invalid AdminId", { status: 305 });
         }
 
-        const file = formdata.get('file') as File | null;
-        let documentUrl;
-
-        if (file) {
-            const uniqueFilename = `${Date.now()}_${body.docname}${path.extname(file.name)}`;
-            // Convert the file into a buffer
-            const buffer = Buffer.from(await file.arrayBuffer());
-            
-            documentUrl = await uploadBlobToFtp(buffer, {
-                userId: adminId.toString(),
-                fileType: 'admin-docs',
-                fileName: uniqueFilename
-            });
-            if (!documentUrl) {
-                return new NextResponse("Failed to upload file to FTP", { status: 500 });
-            }
-        }
-
-        console.log(documentUrl)
-
         const updateAdminData = await Admindatas.findOneAndUpdate(
             { AdminId: body?.adminId },
             {
                 $push: {
                     Documents: {
                         DocName: body?.docname,
-                        ExpireAt: body?.expire,
-                        RemindAt: body?.remind,
-                        DocUrl: documentUrl
+                        ExpireAt: body?.expire || null,
+                        RemindAt: body?.remind || null,
+                        DocUrl: body?.docUrl
                     }
                 }
             },
             { new: true }
         );
 
-        return NextResponse.json({ adminData: updateAdminData, uploadedUrl: documentUrl });
+        return NextResponse.json({ adminData: updateAdminData, uploadedUrl: body?.docUrl });
     } catch (error) {
         console.log(error);
         return new NextResponse("Internal Server Error", { status: 500 });

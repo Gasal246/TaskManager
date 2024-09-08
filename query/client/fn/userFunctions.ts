@@ -181,3 +181,12 @@ export async function resetPassword (formData: FormData){
         console.log(error);
     }
 }
+
+export async function getUserRole ( userid: string ) {
+    try {
+        const res = await axios.get(`/api/users/get-role/${userid}`);
+        return res.data;
+    } catch (error) {
+        console.log(error);
+    }
+}

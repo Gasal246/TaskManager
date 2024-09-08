@@ -18,6 +18,8 @@ import { useRouter } from 'next/navigation'
 import EditStaffDialog from '@/components/admin/EditStaffDialog'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuTrigger, } from "@/components/ui/dropdown-menu"
 import { Badge } from '@/components/ui/badge'
+import { deleteObject, ref } from 'firebase/storage'
+import { storage } from '@/firebase/config'
 
 
 const StaffPage = ({ params }: { params: { staffid: string } }) => {
@@ -36,22 +38,42 @@ const StaffPage = ({ params }: { params: { staffid: string } }) => {
     return toast.success("Skill Successfully Removed.");
   }
 
-  const handleDeleteDocument = async (docid: string) => {
-    const response = await removeDocument({ staffid: params.staffid, docid: docid });
-    if (response?._id) {
-      return toast.success("Document Removed.");
-    } else {
-      return toast.error("Failed to remove document.")
+  const handleDeleteDocument = async (docid: string, docUrl: string) => {
+    try {
+      const fileRef = ref(storage, docUrl);
+      await deleteObject(fileRef);
+      const response = await removeDocument({ staffid: params.staffid, docid: docid });
+      if (response?._id) {
+        return toast.success("Document Removed.");
+      } else {
+        return toast.error("Failed to remove document.")
+      }
+    } catch (error) {
+      console.log(error);
     }
   }
 
   const handleDeleteStaff = async () => {
-    const response = await deleteStaff(params?.staffid);
-    if (response?._id) {
-      router.replace('/admin/staffs')
-      return toast.success("Staff Removed Successfully.");
-    } else {
-      return toast.error("Failed to remove staff.")
+    const deleteDocPromises = staffData?.Documents?.map(async (doc: any) => {
+      const docRef = ref(storage, doc?.DocUrl);
+      await deleteObject(docRef);
+    })
+    try {
+      const response = await deleteStaff(params?.staffid);
+      await Promise.all(deleteDocPromises);
+      if (staffData?.AvatarUrl) {
+        const pfpRef = ref(storage, staffData?.AvatarUrl);
+        await deleteObject(pfpRef);
+      }
+      if (response?._id) {
+        router.replace('/admin/staffs')
+        return toast.success("Staff Removed Successfully.");
+      } else {
+        return toast.error("Failed to remove staff.")
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error("Something went wrong on deleting staff data.")
     }
   }
 
@@ -157,7 +179,7 @@ const StaffPage = ({ params }: { params: { staffid: string } }) => {
                   <h3 className='text-xs font-medium text-slate-400'>Exp: <span className='text-cyan-600'>{formatDateShortly(doc?.ExpireAt)}</span></h3>
                   <h3 className='text-xs font-medium text-slate-400'>Remind: <span className='text-cyan-600'>{formatDateShortly(doc?.RemindAt)}</span></h3>
                   <motion.div whileTap={{ scale: 0.98 }} whileHover={{ scale: 1.05 }} className='absolute top-2 right-2'>
-                    <Popconfirm title='Delete Document' description='Are you sure about to delete this document ?' cancelText='No' okText='Yes' onConfirm={() => handleDeleteDocument(doc?._id)}><Trash2 size={18} className='hover:text-red-600' /></Popconfirm>
+                    <Popconfirm title='Delete Document' description='Are you sure about to delete this document ?' cancelText='No' okText='Yes' onConfirm={() => handleDeleteDocument(doc?._id, doc?.DocUrl)}><Trash2 size={18} className='hover:text-red-600' /></Popconfirm>
                   </motion.div>
                 </div>
               </Tooltip>

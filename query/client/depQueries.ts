@@ -1,6 +1,6 @@
 import { QUERY_KEYS } from "../queryKeys";
 import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { addAreaStaff, addDepStaff, addRegionalStaff, editDepName, getAreaStaffs, getAvailableStaffs, getRegionalStaffs, removeDepStaff} from "./fn/depFunctions";
+import { addAreaStaff, addDepStaff, addRegionalStaff, editDepName, getAreaStaffs, getAvailableStaffs, getDepartmentsByHeadId, getRegionalStaffs, removeDepStaff} from "./fn/depFunctions";
 
 // ADMIN SIDE
 export const useGetAvailableStaffs = (adminId: string, roles?: userTypes[]) => {
@@ -117,5 +117,13 @@ export const useAddAreaStaff = () => {
                 queryKey: [QUERY_KEYS.GET_AREA_ID]
             })
         }
+    })
+}
+
+export const useShowDepartmentForHeads = (userid: string) => {
+    return useQuery({
+        queryKey: [QUERY_KEYS.GET_DEPARTMENTS_BY_HEADID, userid],
+        queryFn: async () => await getDepartmentsByHeadId(userid),
+        enabled: !!userid
     })
 }

@@ -24,12 +24,6 @@ interface Body {
     [key: string]: any; // For dynamic document properties
 }
 
-// export const config = {
-//     api: {
-//         bodyParser: false,
-//     },
-// };
-
 export async function POST(req: NextRequest) {
     try {
         const session: any = await getServerSession(authOptions);
@@ -43,37 +37,17 @@ export async function POST(req: NextRequest) {
         if(existing){
             return Response.json({ existing: true });
         }
-
-        const baseUploadDir = path.join(process.cwd(), 'public', 'uploads', 'user-docs');
-        const userUploadDir = path.join(baseUploadDir, body.Email);
-        await fs.mkdir(userUploadDir, { recursive: true });
-
+        
         const documents: Document[] = [];
         for (let i = 0; ; i++) {
             const name = body[`documents[${i}][name]`];
-            if (!name) break;
-
-            const expireAt = body[`documents[${i}][expireAt]`];
-            const remindMe = body[`documents[${i}][remindMe]`];
-            const file = formData.get(`documents[${i}][file]`) as File | null;
-
-            if (file) {
-                const extension = path.extname(file.name);
-                const uniqueFileName = `${Date.now()}_${name}${extension}`;
-                const relativeFilePath = path.join('uploads', 'user-docs', body.Email, uniqueFileName);
-                const newFilePath = path.join(baseUploadDir, body.Email, uniqueFileName);
-
-                // Cast Buffer to Uint8Array
-                const buffer = Buffer.from(await file.arrayBuffer());
-                await fs.writeFile(newFilePath, new Uint8Array(buffer));
-
-                documents.push({
-                    DocName: name,
-                    ExpireAt: expireAt,
-                    RemindAt: remindMe,
-                    DocUrl: `/${relativeFilePath.replace(/\\/g, '/')}`, // Ensure correct path format
-                });
-            }
+            if(!name) break;
+            documents.push({
+                DocName: body[`documents[${i}][name]`],
+                ExpireAt: body[`documents[${i}][expireAt]`],
+                RemindAt: body[`documents[${i}][remindAt]`],
+                DocUrl: body[`documents[${i}][file]`]
+            });
         }
 
         const newUser = new Users({

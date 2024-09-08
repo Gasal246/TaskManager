@@ -162,3 +162,12 @@ export async function addMoreDep(formData: FormData){
         console.log(error);
     }
 }
+
+export async function addAdminDoc(formData: FormData){
+    try {
+        const res = await axios.post('/api/superadmin/upload-admin-doc', formData);
+        return res.data;
+    } catch (error) {
+        console.log(error);
+    }
+}

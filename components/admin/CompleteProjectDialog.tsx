@@ -10,6 +10,9 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from '../ui/textarea'
 import { X } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
+import { useShowDepartmentForHeads } from '@/query/client/depQueries'
+import { useSession } from 'next-auth/react'
+import { Skeleton } from '../ui/skeleton'
 
 const formSchema = z.object({
     description: z.string().min(2),
@@ -17,6 +20,8 @@ const formSchema = z.object({
 })
 
 const CompleteProjectDialog = ({ trigger }: { trigger: React.ReactNode }) => {
+    const { data: session }: any = useSession();
+    const { data: departments, isLoading: loadingDepartments } = useShowDepartmentForHeads(session?.user?.id)
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -28,6 +33,7 @@ const CompleteProjectDialog = ({ trigger }: { trigger: React.ReactNode }) => {
     function onSubmit(values: z.infer<typeof formSchema>) {
         console.log(values)
     }
+
     return (
         <Dialog>
             <DialogTrigger asChild>{trigger}</DialogTrigger>
@@ -51,7 +57,8 @@ const CompleteProjectDialog = ({ trigger }: { trigger: React.ReactNode }) => {
                                 </FormItem>
                             )}
                         />
-                        <FormField
+                        { loadingDepartments ? <Skeleton className='w-full h-[40px]' /> :
+                            <FormField
                             control={form.control}
                             name="forwardDepId"
                             render={({ field }) => (
@@ -64,16 +71,16 @@ const CompleteProjectDialog = ({ trigger }: { trigger: React.ReactNode }) => {
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            <SelectItem value="m@example.com">To Admin</SelectItem>
-                                            <SelectItem value="m@google.com">To Dep One</SelectItem>
-                                            <SelectItem value="m@support.com">To Dep Two</SelectItem>
+                                            {departments?.map((dep: any) => (
+                                                <SelectItem value={dep?._id} key={dep?._id}>{dep?.DepartmentName}</SelectItem>
+                                            ))}
                                         </SelectContent>
                                     </Select>
                                     <FormMessage />
                                 </FormItem>
                             )}
-                        />
-                        <div className="flex justify-end"><Button type="submit">Continue</Button></div>
+                        />}
+                        {form.getValues('description') && <div className="flex justify-end"><Button type="submit">{'Continue'}</Button></div>}
                     </form>
                 </Form>
             </DialogContent>

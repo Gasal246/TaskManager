@@ -1,5 +1,5 @@
 "use client"
-import React, { useState } from 'react'
+import React from 'react'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, } from "@/components/ui/dialog"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
@@ -8,55 +8,41 @@ import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage, } from "@/components/ui/form"
 import { Switch } from "@/components/ui/switch"
 import { Checkbox } from "@/components/ui/checkbox"
-
-const items = [
-    {
-        id: "recents",
-        label: "Recents",
-    },
-    {
-        id: "home",
-        label: "Home",
-    },
-    {
-        id: "applications",
-        label: "Applications",
-    },
-    {
-        id: "desktop",
-        label: "Desktop",
-    },
-    {
-        id: "downloads",
-        label: "Downloads",
-    },
-    {
-        id: "documents",
-        label: "Documents",
-    },
-] as const
+import { Avatar } from 'antd'
+import { useSession } from 'next-auth/react'
+import { useDocumentChangeAccess } from '@/query/client/projectQueries'
+import { toast } from 'sonner'
 
 const formSchema = z.object({
-    DocName: z.string().min(2),
     Private: z.boolean(),
-    items: z.array(z.string()).refine((value) => value.some((item) => item), {
-        message: "You have to select at least one item.",
-    }),
+    userids: z.array(z.string()).refine((value) => value.some((item) => item), {message: "You have to select at least one other user.", }),
 })
 
-const ChangeAccessDocumentDialog = ({ trigger }: { trigger: React.ReactNode }) => {
+const ChangeAccessDocumentDialog = ({ trigger, projectid, doc, creatorid, adminid }: { trigger: React.ReactNode, projectid: string, doc:any, creatorid: string, adminid: string }) => {
+    const { data: session }:any = useSession();
+    const { mutateAsync: changeAccess, isPending: changingAccess } = useDocumentChangeAccess();
+
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            DocName: "",
-            Private: false,
-            items: ["recents", "home"]
+            Private: doc?.AccessTo?.length == 2 && doc?.AccessTo?.includes(adminid),
+            userids: doc?.AccessTo?.map((x: any) => x._id)
         },
     })
 
-    function onSubmit(values: z.infer<typeof formSchema>) {
-        console.log(values)
+    async function onSubmit(values: z.infer<typeof formSchema>) {
+        const formData = new FormData();
+        formData.append('projectid', projectid);
+        formData.append('docid', doc?._id);
+        formData.append('accessArray', values.userids?.join(','));
+        const response = await changeAccess(formData);
+        if(response?._id){
+            return toast.success("Document Access Changed!!")
+        }else{
+            return toast.error("Something went wrong on changing access!!")
+        }
     }
+
     return (
         <Dialog>
             <DialogTrigger className='w-full'>{trigger}</DialogTrigger>
@@ -66,8 +52,8 @@ const ChangeAccessDocumentDialog = ({ trigger }: { trigger: React.ReactNode }) =
                     <DialogDescription>Update the accessability of this document for the project viewers.</DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
-                        <h1 className='text-base font-semibold'>Document Name</h1>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                        <h1 className='text-base font-medium text-slate-400'>doc: {doc?.DocName}</h1>
                         <FormField
                             control={form.control}
                             name="Private"
@@ -75,14 +61,13 @@ const ChangeAccessDocumentDialog = ({ trigger }: { trigger: React.ReactNode }) =
                                 <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                                     <div className="space-y-0.5">
                                         <FormLabel className={`text-base ${form.getValues('Private') === false && 'text-slate-400'}`}> Private File </FormLabel>
-                                        <FormDescription className={`${form.getValues('Private') === false && 'text-orange-400'}`}> Switching to private file will make this document only view to you & company. </FormDescription>
+                                        <FormDescription className={`${form.getValues('Private') === false && 'text-orange-400'}`}> Switching to private file will make this document only view to owner & company. </FormDescription>
                                     </div>
                                     <FormControl>
                                         <Switch
                                             checked={field.value}
                                             onCheckedChange={field.onChange}
                                         />
-                                        {/* Disable the switching option for the staffs and all the documents added by staff is default added as private document. */}
                                     </FormControl>
                                 </FormItem>
                             )}
@@ -91,37 +76,44 @@ const ChangeAccessDocumentDialog = ({ trigger }: { trigger: React.ReactNode }) =
                             form?.getValues('Private') === false &&
                             <FormField
                                 control={form.control}
-                                name="items"
+                                name="userids"
                                 render={() => (
                                     <FormItem>
                                         <div className="mb-2">
-                                            <FormLabel className="text-base">Private File</FormLabel>
-                                            <FormDescription>Select the athority in which this document act as public.</FormDescription>
+                                            <FormLabel className="text-base">File Access</FormLabel>
+                                            <FormDescription>Select the accessible users who could see this document</FormDescription>
                                         </div>
-                                        {items.map((item) => (
+                                        {doc?.AccessTo?.map((user: any) => (
                                             <FormField
-                                                key={item.id}
+                                                key={user?._id}
                                                 control={form.control}
-                                                name="items"
+                                                name="userids"
                                                 render={({ field }) => {
                                                     return (
-                                                        <FormItem key={item.id} className="flex flex-row items-start space-x-3 space-y-0">
+                                                        <FormItem key={user?._id} className="flex flex-row items-center space-x-2 space-y-0">
                                                             <FormControl>
                                                                 <Checkbox
-                                                                    checked={field.value?.includes(item.id)}
+                                                                    checked={field.value?.includes(user?._id)}
                                                                     onCheckedChange={(checked) => {
                                                                         return checked
-                                                                            ? field.onChange([...field.value, item.id])
+                                                                            ? field.onChange([...field.value, user?._id])
                                                                             : field.onChange(
                                                                                 field.value?.filter(
-                                                                                    (value) => value !== item.id
+                                                                                    (value) => value !== user?._id
                                                                                 )
                                                                             )
                                                                     }}
+                                                                    disabled={session?.user?.id == creatorid || session?.user?.id == adminid}
                                                                 />
                                                             </FormControl>
                                                             <FormLabel className="font-normal">
-                                                                {item.label}
+                                                                <div className="flex gap-1 items-center p-2 rounded-lg bg-slate-950/50">
+                                                                    <Avatar src={user?.AvatarUrl || '/avatar.png'} />
+                                                                    <div>
+                                                                        <h1 className='text-xs leading-3 font-medium'>{user?.Name}</h1>
+                                                                        <h1 className='text-xs'>{user?.Email}</h1>
+                                                                    </div>
+                                                                </div>
                                                             </FormLabel>
                                                         </FormItem>
                                                     )
@@ -133,7 +125,7 @@ const ChangeAccessDocumentDialog = ({ trigger }: { trigger: React.ReactNode }) =
                                 )}
                             />
                         }
-                        <Button type="submit">Submit</Button>
+                        <Button type="submit" disabled={changingAccess}>{changingAccess ? 'Updating..' : 'Confirm'}</Button>
                     </form>
                 </Form>
             </DialogContent>

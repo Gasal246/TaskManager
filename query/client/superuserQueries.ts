@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { addDemoDep, addMoreDep, addNewAdmin, changeAdminStatus, deleteAdminData, deleteAdminDep, deleteAdminDoc, deleteDemoDepartment, editAdmin, editDepartment, findAdminByAdminid, getAdmins, getAdminsWithin, getAllAdminUsers, getDemoDeparments, getDepartmentById, getSuperUserById, searchAdmins } from "./fn/superAdminFn";
+import { addAdminDoc, addDemoDep, addMoreDep, addNewAdmin, changeAdminStatus, deleteAdminData, deleteAdminDep, deleteAdminDoc, deleteDemoDepartment, editAdmin, editDepartment, findAdminByAdminid, getAdmins, getAdminsWithin, getAllAdminUsers, getDemoDeparments, getDepartmentById, getSuperUserById, searchAdmins } from "./fn/superAdminFn";
 import { QUERY_KEYS } from "../queryKeys";
 import { DateRange } from "react-day-picker";
 
@@ -207,6 +207,21 @@ export const useAddMoreDep = () => {
             })
             queryClient.invalidateQueries({
                 queryKey: [QUERY_KEYS.GET_ADMIN_ADMINID],
+            })
+        }
+    })
+}
+
+export const useAddAdminDoc = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (formData: FormData) => addAdminDoc(formData),
+        onSuccess: (data: any) => {
+            queryClient.invalidateQueries({
+                queryKey: [QUERY_KEYS.GET_ADMIN_ADMINID, data?.AdminData?.AdminId]
+            })
+            queryClient.invalidateQueries({
+                queryKey: [QUERY_KEYS.GET_ADMIN_ADMINID]
             })
         }
     })

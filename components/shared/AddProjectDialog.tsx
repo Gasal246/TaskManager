@@ -15,6 +15,8 @@ import { useFindUserById } from '@/query/client/userQueries'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
 import { toast } from 'sonner'
 import { useAddNewProject } from '@/query/client/projectQueries'
+import { useGetAllDepartments } from '@/query/client/adminQueries'
+import LoaderSpin from './LoaderSpin'
 
 const formSchema = z.object({
     title: z.string(),
@@ -25,6 +27,7 @@ const AddProjectDialog = ({ trigger }: { trigger: React.ReactNode }) => {
     const { data: session }: any = useSession();
     const { data: currentUser, isLoading: currentUserLoading } = useFindUserById(session?.user?.id);
     const { mutateAsync: addProject, isPending: addingProject } = useAddNewProject();
+    const { data: departments, isLoading: loadingDepartments } = useGetAllDepartments(session?.user?.id);
     const [deadline, setDeadline] = useState('');
     const [priority, setPriority] = useState('low');
 
@@ -38,17 +41,17 @@ const AddProjectDialog = ({ trigger }: { trigger: React.ReactNode }) => {
     })
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
-        if(currentUser?.Role == 'admin' && !values?.depId){
+        if (currentUser?.Role == 'admin' && !values?.depId) {
             return toast.error("You should select a Department before continue.");
         }
         const formData = new FormData();
         formData.append('title', values.title);
         formData.append('description', values.description);
         formData.append('deadline', deadline);
-        formData.append('depId', currentUser?.Role == 'admin' ? values.depId : currentUser?.Department);
+        formData.append('depId', currentUser?.Role == 'admin' ? values.depId : currentUser?.Department?._id);
         formData.append('priority', priority);
         const response = await addProject(formData);
-        if(response?._id){
+        if (response?._id) {
             return toast.success("Project is Queued.", { description: "Admin should approve the queued projects to start working on it." })
         }
     }
@@ -91,9 +94,9 @@ const AddProjectDialog = ({ trigger }: { trigger: React.ReactNode }) => {
                         <div>
                             <label className='text-sm font-medium'>Select Priority</label><br />
                             <div className="flex items-center gap-2">
-                                <h1 className={`cursor-pointer text-sm font-medium hover:bg-cyan-950/50 border ${priority == 'high' && 'bg-cyan-950/70'} border-slate-500 p-1 px-3 flex gap-1 items-center rounded-lg`} onClick={() => setPriority('high')}>High <Flag size={18} fill='red' /></h1>
-                                <h1 className={`cursor-pointer text-sm font-medium hover:bg-cyan-950/50 border ${priority == 'average' && 'bg-cyan-950/70'} border-slate-500 p-1 px-3 flex gap-1 items-center rounded-lg`} onClick={() => setPriority('average')}>Average <Flag size={18} fill='gold' /></h1>
-                                <h1 className={`cursor-pointer text-sm font-medium hover:bg-cyan-950/50 border ${priority == 'low' && 'bg-cyan-950/70'} border-slate-500 p-1 px-3 flex gap-1 items-center rounded-lg`} onClick={() => setPriority('low')}>Low <Flag size={18} fill='silver' /></h1>
+                                <h1 className={`cursor-pointer text-sm font-medium hover:bg-cyan-950/50 border ${priority == 'high' && 'bg-cyan-950'} border-slate-500 p-1 px-3 flex gap-1 items-center rounded-lg`} onClick={() => setPriority('high')}>High <Flag size={18} fill='red' /></h1>
+                                <h1 className={`cursor-pointer text-sm font-medium hover:bg-cyan-950/50 border ${priority == 'average' && 'bg-cyan-950'} border-slate-500 p-1 px-3 flex gap-1 items-center rounded-lg`} onClick={() => setPriority('average')}>Average <Flag size={18} fill='gold' /></h1>
+                                <h1 className={`cursor-pointer text-sm font-medium hover:bg-cyan-950/50 border ${priority == 'low' && 'bg-cyan-950'} border-slate-500 p-1 px-3 flex gap-1 items-center rounded-lg`} onClick={() => setPriority('low')}>Low <Flag size={18} fill='silver' /></h1>
                             </div>
                         </div>
                         {
@@ -103,16 +106,18 @@ const AddProjectDialog = ({ trigger }: { trigger: React.ReactNode }) => {
                                 name="depId"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Department</FormLabel>
+                                        <FormLabel className='flex gap-1 items-center'>Department {loadingDepartments && <LoaderSpin size={22} />}</FormLabel>
                                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                                             <FormControl>
                                                 <SelectTrigger>
-                                                    <SelectValue placeholder="Select The Department From List" />
+                                                    <SelectValue placeholder={`${departments?.length > 0 ? 'Select The Department From List' : 'You Have No Deparmtents'}`} />
                                                 </SelectTrigger>
                                             </FormControl>
-                                            <SelectContent>
-                                                <SelectItem value="dep.id">dep.name</SelectItem>
-                                            </SelectContent>
+                                            {departments?.length > 0 && <SelectContent>
+                                                {departments?.map((dep: any) => (
+                                                    <SelectItem key={dep?._id} value={dep?._id}>{dep?.DepartmentName}</SelectItem>
+                                                ))}
+                                            </SelectContent>}
                                         </Select>
                                         <FormMessage />
                                     </FormItem>

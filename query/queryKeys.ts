@@ -37,7 +37,16 @@ export enum QUERY_KEYS {
     GET_COMMENTS_BY_TASKID = "getCommentByTaskId",
     GET_CHOOSE_STAFFS = "getChooseStaffs",
     GET_ALL_NOTIFICATIONS = "getNotificationsByUserId",
+    GET_USER_ROLE="getUserRoleById",
+    GET_DEPARTMENTS_BY_HEADID = "getDepartmentsByHeadId",
 
     // project keys
     GET_ALL_PROJECTS = "getAllProjects",
+    GET_PROJECT_BY_ID = "getProjectById",
+    GET_PROJECT_DOCS = "getProjectsDocsByProjectid",
+    GET_PROJECT_FLOWS = "getProjectFlowsByProjectId",
+    GET_PROJECT_COMMENTS = "getProjectCommentsByProjectId",
+
+    // Analytics
+    GET_PROJECTS_ANALYTICS = "getProjectsAnalytics"
 }

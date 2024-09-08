@@ -13,7 +13,7 @@ export interface IProjectFlows extends Document {
 const ProjectFlowsSchema: Schema = new Schema({
   Title: { type: String },
   Description: { type: String },
-  Status: { type: String, enum: [ 'complete', 'rollback' ] },
+  Status: { type: String, enum: [ 'complete', 'rollback', 'custom' ] },
   Creator: { type: Schema.Types.ObjectId, ref: "Users" },
 }, { timestamps: true });
 

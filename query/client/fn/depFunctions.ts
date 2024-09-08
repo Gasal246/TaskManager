@@ -73,3 +73,12 @@ export async function addAreaStaff(depId: string, regId: string, areaId: string,
         console.log(error);
     }
 }
+
+export async function getDepartmentsByHeadId(userid: string){
+    try {
+        const res = await axios.get(`/api/department/get-all/headid/${userid}`);
+        return res.data;
+    } catch (error) {
+        console.log(error);
+    }
+}

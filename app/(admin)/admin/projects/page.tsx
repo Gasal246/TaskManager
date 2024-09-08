@@ -1,6 +1,6 @@
 "use client"
-import React from 'react'
-import { ArrowUpWideNarrow, Circle, Dot, FilePlus, Menu, SortAsc, SortDesc, Trash2 } from 'lucide-react'
+import React, { useEffect, useState } from 'react'
+import { ArrowUpWideNarrow, Circle, Dot, FilePlus, Frown, Menu, SortAsc, SortDesc, Trash2 } from 'lucide-react'
 import { Popover, PopoverContent, PopoverTrigger, } from "@/components/ui/popover";
 import { motion } from 'framer-motion';
 import { Avatar, Badge, ConfigProvider, GetProps, Input, Popconfirm, Tooltip } from 'antd';
@@ -11,25 +11,46 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import AddProjectDialog from '@/components/shared/AddProjectDialog';
+import ProjectCards from '@/components/admin/ProjectCards';
+import ProjectCardsSkeleton from '@/components/skeletons/ProjectCardsSkeleton';
+import useDebounce from '@/hooks/useDebounce';
+import { useSearchProjects } from '@/query/client/projectQueries';
+import { useSession } from 'next-auth/react';
+import Image from 'next/image';
+import { formatDateTiny, multiFormatDateString } from '@/lib/utils';
+import { useGetAllProjectAnalytics } from '@/query/client/analyticsQueries';
+import { useFindUserById } from '@/query/client/userQueries';
 
 
 type SearchProps = GetProps<typeof Input.Search>;
 
 const ProjectsPage = () => {
-  const { Search } = Input;
+  const { data: session }: any = useSession();
+  const { data: newAnalytics, isLoading: loadingNewAnalytics }: any = useGetAllProjectAnalytics(session?.user?.id, 'new');
+  const { data: endedAnalytics, isLoading: loadingEndedAnalytics }: any = useGetAllProjectAnalytics(session?.user?.id, 'ended');
+  const { data: deletedAnalytics, isLoading: loadingDeletedAnalytics }: any = useGetAllProjectAnalytics(session?.user?.id, 'deleted');
+  const { data: ongoingAnalytics, isLoading: loadingOngoingAnalytics }: any = useGetAllProjectAnalytics(session?.user?.id, 'ongoing');
+  const { data: ownedAnalytics, isLoading: loadingOwnedAnalytics }: any = useGetAllProjectAnalytics(session?.user?.id, 'owned');
+
+  const { data: currentUser, isLoading: loadingUserData } = useFindUserById(session?.user?.id);
+
   const router = useRouter();
+  const { Search } = Input;
+  const [searchValue, setSearchValue] = useState('');
+  const { mutateAsync: searchProjects, isPending: searchingProjects } = useSearchProjects();
+  const [allProjects, setAllProjects] = useState<any[]>([])
   const handleSearch: SearchProps['onSearch'] = async (value, _e, info) => {
-    console.log(info?.source, value)
+    console.log(value)
+    setSearchValue(value);
+    const response = await searchProjects({ userid: session?.user?.id, searchTerm: value });
+    setAllProjects(response);
   }
 
-  const handleDeleteProject = async (projectid: string) => {
-    // SOFT DELETE PROJECT AND DELETE PERMENENTLY AFTER 7DAYS
-  }
   return (
     <div className='p-4'>
       <div className="flex justify-between bg-slate-950/50 p-3 rounded-lg items-center">
         <h1 className='font-bold'>Project Management</h1>
-        
+
         <Popover>
           <PopoverTrigger className='p-2 bg-slate-600 rounded-lg hover:bg-slate-700 cursor-pointer'><ArrowUpWideNarrow /></PopoverTrigger>
           <PopoverContent className='w-[140px] p-1 mr-3'>
@@ -50,210 +71,74 @@ const ProjectsPage = () => {
           <AddProjectDialog trigger={<Button className='font-medium text-sm flex items-center gap-1 bg-neutral-300'>Add Project <FilePlus size={18} /></Button>} />
         </div>
 
-        <Tabs defaultValue="new" className="w-full">
-          <TabsList className="grid w-full grid-cols-5 gap-1 border border-slate-700">
-            <div className='px-2'><Badge count={1} size='small' className='w-full text-neutral-400 '><TabsTrigger value="new" className='flex items-center gap-3 w-full border border-slate-950'>New Projects</TabsTrigger></Badge></div>
-            <div className='px-2'><TabsTrigger value="ongoing" className='flex items-center gap-3 w-full border border-slate-950'>Ongoing Projects</TabsTrigger></div>
-            <div className='px-2'><TabsTrigger value="owned" className='flex items-center gap-3 w-full border border-slate-950'>Owned Projects</TabsTrigger></div>
-            <div className='px-2'><TabsTrigger value="deleted" className='flex items-center gap-3 w-full border border-slate-950'>Deleted Projects</TabsTrigger></div>
-            <div className='px-2'><TabsTrigger value="ended" className='flex items-center gap-3 w-full border border-slate-950'>Ended Projects</TabsTrigger></div>
+        {!searchValue ? <Tabs defaultValue="ongoing" className="w-full">
+          <TabsList className={`grid w-full ${currentUser?.Role == 'admin' ? 'grid-cols-5' : 'grid-cols-4'} gap-1 border border-slate-700`}>
+            {currentUser?.Role == 'admin' && <div className='px-2'><Badge count={newAnalytics?.unopenedProjects?.length} size='small' className='w-full text-slate-300'><TabsTrigger value="new" className='flex items-center gap-3 w-full border border-slate-950'>New Projects</TabsTrigger></Badge></div>}
+            <div className='px-2'><Badge size='small' count={ongoingAnalytics?.unopenedProjects?.length} className='w-full text-slate-300'><TabsTrigger value="ongoing" className='flex items-center gap-3 w-full border border-slate-950'>Ongoing Projects</TabsTrigger></Badge></div>
+            <div className='px-2'><Badge size='small' count={ownedAnalytics?.unopenedProjects?.length} className='w-full text-slate-300'><TabsTrigger value="owned" className='flex items-center gap-3 w-full border border-slate-950'>Owned Projects</TabsTrigger></Badge></div>
+            <div className='px-2'><Badge size='small' count={deletedAnalytics?.unopenedProjects?.length} className='w-full text-slate-300'><TabsTrigger value="deleted" className='flex items-center gap-3 w-full border border-slate-950'>Deleted Projects</TabsTrigger></Badge></div>
+            <div className='px-2'><Badge size='small' count={endedAnalytics?.unopenedProjects?.length} className='w-full text-slate-300'><TabsTrigger value="ended" className='flex items-center gap-3 w-full border border-slate-950'>Ended Projects</TabsTrigger></Badge></div>
           </TabsList>
-          <TabsContent value="new">
-            <Card className='border-slate-700'>
-              <CardHeader className='p-3 px-4'><CardTitle>Newest Projects</CardTitle></CardHeader>
-              <CardContent className="p-3 w-full flex flex-wrap">
-                <div className="w-full lg:w-4/12 p-1">
-                  <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={() => router.push('/admin/projects/projectid')} className="bg-neutral-700/70 p-3 rounded-lg cursor-pointer select-none">
-                    <div className="flex justify-between px-1">
-                      <h1 className='text-sm font-medium'>Project Name</h1>
-                      <Popconfirm title="Delete this project?" description="deleted projects will be in your trash for 7days, and deleted permenently." onConfirm={() => handleDeleteProject('123')}><motion.div whileHover={{ rotate: -35 }}><Trash2 color='red' size={18} /></motion.div></Popconfirm>
-                    </div>
-                    <Link href={`/admin/staff/${'staffid'}`}><div className="flex gap-1 bg-slate-950/50 p-2 rounded-lg items-center mt-2 mb-1">
-                      <Avatar src="/avatar.png" size={26} />
-                      <div>
-                        <h1 className='text-xs font-medium leading-3'>Creator Name</h1>
-                        <h1 className='text-xs'>creator@gmail.com</h1>
-                      </div>
-                    </div></Link>
-                    <div className='flex justify-between gap-1 mb-1'>
-                      <Tooltip title="2023-12-06"><div className='bg-slate-950/60 p-1 px-2 rounded-lg w-1/2'>
-                        <h2 className='text-neutral-300 text-[11px] leading-3'>Created On</h2>
-                        <h2 className='text-slate-300 text-[10px]'>just now</h2>
-                      </div></Tooltip>
-                      <Tooltip title="2023-12-06"><div className='bg-slate-950/60 p-1 px-2 rounded-lg w-1/2'>
-                        <h2 className='text-neutral-300 text-[11px] leading-3'>Created On</h2>
-                        <h2 className='text-slate-300 text-[10px]'>just now</h2>
-                      </div></Tooltip>
-                    </div>
-                    <div className='px-2 mb-2'>
-                      <h2 className='text-xs text-red-400 flex items-center gap-1 font-medium'><Circle size={10} fill="" strokeWidth={5} />HIGH priority</h2>
-                      <h2 className='text-xs text-orange-400 flex items-center gap-1 font-medium'><Circle size={10} fill="" strokeWidth={5} />waiting approval</h2>
-                    </div>
-                    <div className='flex gap-1 items-center'>
-                      <Progress value={67} /> <span className='text-xs'>67%</span>
-                    </div>
-                  </motion.div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          <TabsContent value="ongoing">
-            <Card className='border-slate-700'>
-              <CardHeader className='p-3'><CardTitle>Ongoing Projects</CardTitle></CardHeader>
-              <CardContent className="p-3 w-full flex flex-wrap">
-                <div className="w-full lg:w-4/12 p-1">
-                  <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="bg-neutral-700/70 p-3 rounded-lg cursor-pointer select-none">
-                    <div className="flex justify-between px-1">
-                      <h1 className='text-sm font-medium'>Project Name</h1>
-                      <Popconfirm title="Delete this project?" description="deleted projects will be in your trash for 7days, and deleted permenently." onConfirm={() => handleDeleteProject('123')}><motion.div whileHover={{ rotate: -35 }}><Trash2 color='red' size={18} /></motion.div></Popconfirm>
-                    </div>
-                    <Link href={`/admin/staff/${'staffid'}`}><div className="flex gap-1 bg-slate-950/50 p-2 rounded-lg items-center mt-2 mb-1">
-                      <Avatar src="/avatar.png" size={26} />
-                      <div>
-                        <h1 className='text-xs font-medium leading-3'>Creator Name</h1>
-                        <h1 className='text-xs'>creator@gmail.com</h1>
-                      </div>
-                    </div></Link>
-                    <div className='flex justify-between gap-1 mb-1'>
-                      <Tooltip title="2023-12-06"><div className='bg-slate-950/60 p-1 px-2 rounded-lg w-1/2'>
-                        <h2 className='text-neutral-300 text-[11px] leading-3'>Created On</h2>
-                        <h2 className='text-slate-300 text-[10px]'>just now</h2>
-                      </div></Tooltip>
-                      <Tooltip title="2023-12-06"><div className='bg-slate-950/60 p-1 px-2 rounded-lg w-1/2'>
-                        <h2 className='text-neutral-300 text-[11px] leading-3'>Created On</h2>
-                        <h2 className='text-slate-300 text-[10px]'>just now</h2>
-                      </div></Tooltip>
-                    </div>
-                    <div className='px-2 mb-2'>
-                      <h2 className='text-xs text-red-400 flex items-center gap-1 font-medium'><Circle size={10} fill="" strokeWidth={5} />HIGH priority</h2>
-                      <h2 className='text-xs text-orange-400 flex items-center gap-1 font-medium'><Circle size={10} fill="" strokeWidth={5} />waiting approval</h2>
-                    </div>
-                    <div className='flex gap-1 items-center'>
-                      <Progress value={67} /> <span className='text-xs'>67%</span>
-                    </div>
-                  </motion.div>
-                </div>
-              </CardContent>
-            </Card>
+          {currentUser?.Role == 'admin' && <TabsContent value="new">
+            <ProjectCards filter='new' currentUser={currentUser} />
+          </TabsContent>}
+          <TabsContent value="ongoing" >
+            <ProjectCards filter='ongoing' currentUser={currentUser}/>
           </TabsContent>
           <TabsContent value="owned">
-            <Card className='border-slate-700'>
-              <CardHeader className='p-3'><CardTitle>Owned Projects</CardTitle></CardHeader>
-              <CardContent className="p-3 w-full flex flex-wrap">
-                <div className="w-full lg:w-4/12 p-1">
-                  <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="bg-neutral-700/70 p-3 rounded-lg cursor-pointer select-none">
-                    <div className="flex justify-between px-1">
-                      <h1 className='text-sm font-medium'>Project Name</h1>
-                      <Popconfirm title="Delete this project?" description="deleted projects will be in your trash for 7days, and deleted permenently." onConfirm={() => handleDeleteProject('123')}><motion.div whileHover={{ rotate: -35 }}><Trash2 color='red' size={18} /></motion.div></Popconfirm>
-                    </div>
-                    <Link href={`/admin/staff/${'staffid'}`}><div className="flex gap-1 bg-slate-950/50 p-2 rounded-lg items-center mt-2 mb-1">
-                      <Avatar src="/avatar.png" size={26} />
-                      <div>
-                        <h1 className='text-xs font-medium leading-3'>Creator Name</h1>
-                        <h1 className='text-xs'>creator@gmail.com</h1>
-                      </div>
-                    </div></Link>
-                    <div className='flex justify-between gap-1 mb-1'>
-                      <Tooltip title="2023-12-06"><div className='bg-slate-950/60 p-1 px-2 rounded-lg w-1/2'>
-                        <h2 className='text-neutral-300 text-[11px] leading-3'>Created On</h2>
-                        <h2 className='text-slate-300 text-[10px]'>just now</h2>
-                      </div></Tooltip>
-                      <Tooltip title="2023-12-06"><div className='bg-slate-950/60 p-1 px-2 rounded-lg w-1/2'>
-                        <h2 className='text-neutral-300 text-[11px] leading-3'>Created On</h2>
-                        <h2 className='text-slate-300 text-[10px]'>just now</h2>
-                      </div></Tooltip>
-                    </div>
-                    <div className='px-2 mb-2'>
-                      <h2 className='text-xs text-red-400 flex items-center gap-1 font-medium'><Circle size={10} fill="" strokeWidth={5} />HIGH priority</h2>
-                      <h2 className='text-xs text-orange-400 flex items-center gap-1 font-medium'><Circle size={10} fill="" strokeWidth={5} />waiting approval</h2>
-                    </div>
-                    <div className='flex gap-1 items-center'>
-                      <Progress value={67} /> <span className='text-xs'>67%</span>
-                    </div>
-                  </motion.div>
-                </div>
-              </CardContent>
-            </Card>
+            <ProjectCards filter='owned' currentUser={currentUser}/>
           </TabsContent>
           <TabsContent value="deleted">
-            <Card className='border-slate-700'>
-              <CardHeader className='p-3'><CardTitle>Deleted Projects</CardTitle></CardHeader>
-              <CardContent className="p-3 w-full flex flex-wrap">
-                <div className="w-full lg:w-4/12 p-1">
-                  <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="bg-neutral-700/70 p-3 rounded-lg cursor-pointer select-none">
-                    <div className="flex justify-between px-1">
-                      <h1 className='text-sm font-medium'>Project Name</h1>
-                      <Popconfirm title="Delete this project?" description="deleted projects will be in your trash for 7days, and deleted permenently." onConfirm={() => handleDeleteProject('123')}><motion.div whileHover={{ rotate: -35 }}><Trash2 color='red' size={18} /></motion.div></Popconfirm>
-                    </div>
-                    <Link href={`/admin/staff/${'staffid'}`}><div className="flex gap-1 bg-slate-950/50 p-2 rounded-lg items-center mt-2 mb-1">
-                      <Avatar src="/avatar.png" size={26} />
-                      <div>
-                        <h1 className='text-xs font-medium leading-3'>Creator Name</h1>
-                        <h1 className='text-xs'>creator@gmail.com</h1>
-                      </div>
-                    </div></Link>
-                    <div className='flex justify-between gap-1 mb-1'>
-                      <Tooltip title="2023-12-06"><div className='bg-slate-950/60 p-1 px-2 rounded-lg w-1/2'>
-                        <h2 className='text-neutral-300 text-[11px] leading-3'>Created On</h2>
-                        <h2 className='text-slate-300 text-[10px]'>just now</h2>
-                      </div></Tooltip>
-                      <Tooltip title="2023-12-06"><div className='bg-slate-950/60 p-1 px-2 rounded-lg w-1/2'>
-                        <h2 className='text-neutral-300 text-[11px] leading-3'>Created On</h2>
-                        <h2 className='text-slate-300 text-[10px]'>just now</h2>
-                      </div></Tooltip>
-                    </div>
-                    <div className='px-2 mb-2'>
-                      <h2 className='text-xs text-red-400 flex items-center gap-1 font-medium'><Circle size={10} fill="" strokeWidth={5} />HIGH priority</h2>
-                      <h2 className='text-xs text-orange-400 flex items-center gap-1 font-medium'><Circle size={10} fill="" strokeWidth={5} />waiting approval</h2>
-                    </div>
-                    <div className='flex gap-1 items-center'>
-                      <Progress value={67} /> <span className='text-xs'>67%</span>
-                    </div>
-                  </motion.div>
-                </div>
-              </CardContent>
-            </Card>
+            <ProjectCards filter='deleted' currentUser={currentUser}/>
           </TabsContent>
           <TabsContent value="ended">
-            <Card className='border-slate-700'>
-              <CardHeader className='p-3'><CardTitle>Deleted Projects</CardTitle></CardHeader>
-              <CardContent className="p-3 w-full flex flex-wrap">
-                <div className="w-full lg:w-4/12 p-1">
-                  <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="bg-neutral-700/70 p-3 rounded-lg cursor-pointer select-none">
+            <ProjectCards filter='ended' currentUser={currentUser}/>
+          </TabsContent>
+        </Tabs> :
+          <Card className='border-slate-700'>
+            <CardHeader className='p-3 px-4 capitalize'><CardTitle>Showing Results For {`"${searchValue}"`}</CardTitle></CardHeader>
+            <CardContent className="p-3 w-full flex flex-wrap">
+              {searchingProjects && <ProjectCardsSkeleton />}
+              {allProjects?.map((project: any) => (
+                <div className="w-full lg:w-4/12 p-1" key={project?._id}>
+                  <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={() => router.push(`/admin/projects/${project?._id}`)} className="bg-neutral-700/70 p-3 rounded-lg cursor-pointer select-none">
                     <div className="flex justify-between px-1">
-                      <h1 className='text-sm font-medium'>Project Name</h1>
-                      <Popconfirm title="Delete this project?" description="deleted projects will be in your trash for 7days, and deleted permenently." onConfirm={() => handleDeleteProject('123')}><motion.div whileHover={{ rotate: -35 }}><Trash2 color='red' size={18} /></motion.div></Popconfirm>
+                      <h1 className='text-sm font-medium'>{project?.Title}</h1>
                     </div>
-                    <Link href={`/admin/staff/${'staffid'}`}><div className="flex gap-1 bg-slate-950/50 p-2 rounded-lg items-center mt-2 mb-1">
-                      <Avatar src="/avatar.png" size={26} />
+                    <Link href={`/admin/staffs/${'staffid'}`}><div className="flex gap-1 bg-slate-950/50 p-2 rounded-lg items-center mt-2 mb-1">
+                      <Avatar src={project?.Creator?.AvatarUrl || '/avatar.png'} size={26} />
                       <div>
-                        <h1 className='text-xs font-medium leading-3'>Creator Name</h1>
-                        <h1 className='text-xs'>creator@gmail.com</h1>
+                        <h1 className='text-xs font-medium leading-3'>{project?.Creator?.Name}</h1>
+                        <h1 className='text-xs'>{project?.Creator?.Email}</h1>
                       </div>
                     </div></Link>
-                    <div className='flex justify-between gap-1 mb-1'>
-                      <Tooltip title="2023-12-06"><div className='bg-slate-950/60 p-1 px-2 rounded-lg w-1/2'>
+                    <div className='flex justify-between gap-1 mb-2'>
+                      <Tooltip title={formatDateTiny(project?.createdAt)}><div className='bg-slate-950/60 p-1 px-2 rounded-lg w-1/2'>
                         <h2 className='text-neutral-300 text-[11px] leading-3'>Created On</h2>
-                        <h2 className='text-slate-300 text-[10px]'>just now</h2>
+                        <h2 className='text-slate-300 text-[10px]'>{multiFormatDateString(project?.createdAt)}</h2>
                       </div></Tooltip>
-                      <Tooltip title="2023-12-06"><div className='bg-slate-950/60 p-1 px-2 rounded-lg w-1/2'>
-                        <h2 className='text-neutral-300 text-[11px] leading-3'>Created On</h2>
-                        <h2 className='text-slate-300 text-[10px]'>just now</h2>
+                      <Tooltip title={formatDateTiny(project?.Deadline)}><div className='bg-slate-950/60 p-1 px-2 rounded-lg w-1/2'>
+                        <h2 className='text-neutral-300 text-[11px] leading-3'>Deadline:</h2>
+                        <h2 className='text-slate-300 text-[10px]'>{multiFormatDateString(project?.Deadline)}</h2>
                       </div></Tooltip>
                     </div>
                     <div className='px-2 mb-2'>
-                      <h2 className='text-xs text-red-400 flex items-center gap-1 font-medium'><Circle size={10} fill="" strokeWidth={5} />HIGH priority</h2>
-                      <h2 className='text-xs text-orange-400 flex items-center gap-1 font-medium'><Circle size={10} fill="" strokeWidth={5} />waiting approval</h2>
+                      <h2 className={`text-xs ${project?.Priority == 'high' ? 'text-red-400' : (project?.Priority == 'average' ? 'text-orange-400' : 'text-slate-400')} flex items-center gap-1 font-medium capitalize`}><Circle size={10} fill="" strokeWidth={5} /><span className='uppercase'>{project?.Priority}</span> priority</h2>
+                      <h2 className={`text-xs ${project?.IsApproved ? 'text-green-400' : 'text-orange-400'} flex items-center gap-1 font-medium`}><Circle size={10} fill="" strokeWidth={5} />{project?.IsApproved ? 'Approved Project' : 'Waiting Approval'}</h2>
                     </div>
                     <div className='flex gap-1 items-center'>
-                      <Progress value={67} /> <span className='text-xs'>67%</span>
+                      <Progress value={project?.Progress} /> <span className='text-xs'>{project?.Progress}%</span>
                     </div>
                   </motion.div>
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+              ))}
+              {!allProjects ? <h1 className='text-sm font-medium flex gap-1 items-center text-red-300'><Frown /> Cannot find any results for {searchValue}</h1> :
+                (allProjects?.length <= 0 && <Tooltip title={`No Data for ${searchValue}.`} ><motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} animate={{ scale: 1.2 }} className='w-full flex justify-center items-center py-10'>
+                  <Image src={`/icons/noresults.png`} alt='noresults' width={200} height={200} className='opacity-70' />
+                </motion.div></Tooltip>)}
+            </CardContent>
+          </Card>
+        }
       </div>
     </div>
   )

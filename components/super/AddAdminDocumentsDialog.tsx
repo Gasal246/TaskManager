@@ -1,49 +1,63 @@
 "use client"
 import React, { use, useState } from 'react'
-import { Button, ConfigProvider, DatePicker, DatePickerProps, Input, Space, Upload, UploadProps } from 'antd';
+import { ConfigProvider, DatePicker, DatePickerProps, Input, Space, Upload, UploadProps } from 'antd';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, } from "@/components/ui/dialog"
 import { toast } from 'sonner';
 import { CloudUpload } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/query/queryKeys';
+import { Button } from '../ui/button';
+import { useAddAdminDoc } from '@/query/client/superuserQueries';
+import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
+import { storage } from '@/firebase/config';
 
 const AddAdminDocumentsDialog = ({ trigger, adminId, updateTrigger }: { trigger: React.ReactNode, adminId: string, updateTrigger?: any }) => {
-    const [ docName, setDocName ] = useState('');
+    const [docName, setDocName] = useState('');
     const [expDate, setExpDate] = useState('');
     const [rmdDate, setRmdDate] = useState('');
-    const queryClient = useQueryClient();
+    const [file, setFile] = useState<File | null>(null);
+    const [loading, setLoading] = useState(false);
+    const { mutateAsync: addAdminDocument, isPending: addingAdminDoc } = useAddAdminDoc()
+    
     const onChangeExipiry: DatePickerProps['onChange'] = (date: any, dateString) => {
         setExpDate(date?.$d);
     }
     const onChangeRemind: DatePickerProps['onChange'] = (date: any, dateString) => {
         setRmdDate(date?.$d)
     }
-    const props: UploadProps = {
-        name: 'file',
-        action: '/api/superadmin/upload-admin-doc',
-        method: 'POST',
-        headers: {
-            ContentType: 'multipart/form-data'
-        },
-        data: { docname: docName, expire: expDate, remind: rmdDate, adminId: adminId},
-        onChange(info) {
-            if (info.file.status !== 'uploading') {
-                console.log(info.file, info.fileList);
+
+    const handleFileSelection = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]?.size > 500 * 1024) {
+            setFile(null);
+            return toast.error("File size exceeds 500KB.", { description: "Please select a smaller sized Document." });
+        } else {
+            setFile(e.target.files ? e.target.files[0] : null);
+        }
+    }
+    const handleFileUpload = async () => {
+        setLoading(true);
+        const documentRef = ref(storage, `admin-docs/${adminId}/${Date.now() + "_" + docName}`);
+        try {
+            const formData = new FormData();
+            await uploadBytes(documentRef, file as any);
+            const docUrl = await getDownloadURL(documentRef);
+            formData.append('docname', docName);
+            formData.append('adminId', adminId);
+            formData.append('expire', expDate);
+            formData.append('remind', rmdDate);
+            formData.append('docUrl', docUrl);
+            const response = await addAdminDocument(formData);
+            if(response?.AdminData){
+                return toast.success("New Document Successfully added.")
             }
-            if (info.file.status === 'done') {
-                toast.success(`${info.file.name} file uploaded successfully`);
-                updateTrigger && updateTrigger(true);
-                queryClient.invalidateQueries({
-                    queryKey: [QUERY_KEYS.GET_ADMIN_ADMINID, adminId]
-                })
-                queryClient.invalidateQueries({
-                    queryKey: [QUERY_KEYS.GET_ADMIN_ADMINID]
-                })
-            } else if (info.file.status === 'error') {
-                toast.error(`${info.file.name} file upload failed.`);
-            }
-        },
-    };
+        } catch (error) {
+            console.log(error);
+            return toast.error("Something went wrong on uploading admin document.")
+        } finally {
+            setLoading(false);
+        }
+    }
+    
     return (
         <Dialog>
             <DialogTrigger className='w-full'>{trigger}</DialogTrigger>
@@ -72,9 +86,11 @@ const AddAdminDocumentsDialog = ({ trigger, adminId, updateTrigger }: { trigger:
                                 <DatePicker onChange={onChangeExipiry} placeholder="Exipiring Date" />
                                 <DatePicker onChange={onChangeRemind} placeholder="Remind Date" />
                             </div>
-                            <div className="max-w-[350px]">
+                            {/* <div className="max-w-[350px]">
                                 <Upload {...props}><Button icon={<CloudUpload />}>Click to Upload</Button></Upload>
-                            </div>
+                            </div> */}
+                            <Input type="file" placeholder='select your document' onChange={(e) => handleFileSelection(e)} />
+                            {file && <Button disabled={loading} onClick={handleFileUpload}>{loading ? 'Adding...' : 'Submit'}</Button>}
                         </Space>
                     </ConfigProvider>
                 </div>
