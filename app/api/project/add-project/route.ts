@@ -17,6 +17,7 @@ interface Body {
     deadline: string;
     priority: string;
     depId: string;
+    clientId: string;
     [key: string]: any;
 }
 
@@ -95,7 +96,8 @@ export async function POST(req: NextRequest) {
             Priority: body?.priority,
             Flows: [flow?._id],
             IsApproved: user?.Role == 'admin',
-            AccessTo: projStaffs
+            AccessTo: projStaffs,
+            ClientId: body?.clientId || null
         })
         const savedProject = await newProject.save();
         await sendNotification("New Project Arrived", `A new Project from ${user?.Email}, ${user?.Role} of ${user?.Deparmtent?.DepartmentName} department. Waiting for your approval.`, user?._id, user?.Addedby, 'project-queued', savedProject?._id);

@@ -56,36 +56,9 @@ export async function getTaskById(taskid: string){
     }
 }
 
-export async function getNewTasks(userid: string){
+export async function getAllTasks(userid: string, filter: TaskTypes){
     try {
-        const res = await axios.get(`/api/task/get-new-tasks/${userid}`);
-        return res.data;
-    } catch (error) {
-        console.log(error);
-    }
-}
-
-export async function getAcceptedTasks(userid: string){
-    try {
-        const res = await axios.get(`/api/task/get-accepted-tasks/${userid}`);
-        return res.data;
-    } catch (error) {
-        console.log(error);
-    }
-}
-
-export async function getCreatedTasks(userid: string){
-    try {
-        const res = await axios.get(`/api/task/get-created-tasks/${userid}`);
-        return res.data;
-    } catch (error) {
-        console.log(error);
-    }
-}
-
-export async function getCompletedTasks(userid: string){
-    try {
-        const res = await axios.get(`/api/task/get-completed-tasks/${userid}`);
+        const res = await axios.get(`/api/task/all-tasks/${userid}?filter=${filter}`);
         return res.data;
     } catch (error) {
         console.log(error);

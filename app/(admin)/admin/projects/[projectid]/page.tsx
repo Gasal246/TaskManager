@@ -93,7 +93,7 @@ const ProjectIdPage = ({ params }: { params: { projectid: string } }) => {
                         <div className="flex gap-2 items-center mt-2 lg:mt-0">
                             {session?.user?.id == projectData?.AdminId && !projectData?.IsApproved && <Popconfirm title="Approve Project!!" description={<h1 className='text-sm'>Are you sure want to approve this project?</h1>}
                                 placement='bottom' okText="Yes" onConfirm={handleApproveProject}><Button className='text-xs lg:text-sm p-1 lg:p-3 bg-green-300 hover:bg-green-400'>Approve Project</Button></Popconfirm>}
-                            {projectData?.IsApproved && <><CompleteProjectDialog trigger={<Button className='text-xs lg:text-sm p-1 lg:p-3'>Complete / Post</Button>} />
+                            {projectData?.IsApproved && <><CompleteProjectDialog workingDep={projectData?.WorkingDepartment} projectId={projectData?._id} trigger={<Button className='text-xs lg:text-sm p-1 lg:p-3'>Complete / Post</Button>} />
                                 <RollbackProjectDialog trigger={<Button className='text-xs lg:text-sm p-1 lg:p-3'>Rollback / Issue</Button>} prevDepId='' /></>}
                             {/* Delete Button Only for Admin  */}
                             {(session?.user?.id == projectData?.AdminId || session?.user?.id == projectData?.Creator?._id) && (<Popconfirm title="Delete Project" description="Are you sure want to schedule it for deletion ?"><Button className='bg-red-700 hover:bg-transparent hover:border-2 border-red-700 text-white text-xs lg:text-sm p-1 lg:p-3'>Delete / Archive</Button></Popconfirm>)}

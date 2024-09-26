@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { QUERY_KEYS } from "../queryKeys";
-import { addNewTask, deleteTask, editTask, findByMail, findUserById, getAcceptedTasks, getTaskComments, getCompletedTasks, getCreatedTasks, getNewTasks, getTaskById, sendEmailVerificationOtp, setupNewPassword, verifyOTP, addTaskComment, removeTaskComment, getChoosableStaffs, getAllNotifications, notificationInview, resetPassword, getUserRole } from "./fn/userFunctions";
+import { addNewTask, deleteTask, editTask, findByMail, findUserById, getTaskComments, getTaskById, sendEmailVerificationOtp, setupNewPassword, verifyOTP, addTaskComment, removeTaskComment, getChoosableStaffs, getAllNotifications, notificationInview, resetPassword, getUserRole, getAllTasks } from "./fn/userFunctions";
 
 export const useFindByMailId = () => {
     const queryClient = useQueryClient();
@@ -37,34 +37,10 @@ export const useFindUserById = (userid: string) => {
 
 // ###### TASKS OF STAFF
 
-export const useGetNewTasks = (userid: string) => {
+export const useGetAllTasks = (userid: string, filter: TaskTypes) => {
     return useQuery({
-        queryKey: [QUERY_KEYS.GET_NEW_TASKS, userid],
-        queryFn: async () => await getNewTasks(userid),
-        enabled: !!userid
-    })
-}
-
-export const useGetAcceptedTasks = (userid: string) => {
-    return useQuery({
-        queryKey: [QUERY_KEYS.GET_ACCEPTED_TASKS, userid],
-        queryFn: async () => await getAcceptedTasks(userid),
-        enabled: !!userid
-    })
-}
-
-export const useGetCreatedTasks = (userid: string) => {
-    return useQuery({
-        queryKey: [QUERY_KEYS.GET_CREATED_TASKS, userid],
-        queryFn: async () => await getCreatedTasks(userid),
-        enabled: !!userid
-    })
-}
-
-export const useGetCompletedTasks = (userid: string) => {
-    return useQuery({
-        queryKey: [QUERY_KEYS.GET_COMPLETED_TASKS, userid],
-        queryFn: async () => await getCompletedTasks(userid),
+        queryKey: [QUERY_KEYS.GET_ALL_TASKS, userid],
+        queryFn: async () => await getAllTasks(userid, filter),
         enabled: !!userid
     })
 }
@@ -83,16 +59,7 @@ export const useAddNewTask = () => {
         mutationFn: ({ formData }: { formData: FormData }) => addNewTask(formData),
         onSuccess: (data: any) => {
             queryClient.invalidateQueries({
-                queryKey: [QUERY_KEYS.GET_NEW_TASKS]
-            })
-            queryClient.invalidateQueries({
-                queryKey: [QUERY_KEYS.GET_ACCEPTED_TASKS]
-            })
-            queryClient.invalidateQueries({
-                queryKey: [QUERY_KEYS.GET_CREATED_TASKS]
-            })
-            queryClient.invalidateQueries({
-                queryKey: [QUERY_KEYS.GET_COMPLETED_TASKS]
+                queryKey: [QUERY_KEYS.GET_ALL_TASKS]
             })
         }
     })
@@ -107,16 +74,7 @@ export const useEditTask = () => {
                 queryKey: [QUERY_KEYS.GET_TASK_BY_ID, data?._id]
             })
             queryClient.invalidateQueries({
-                queryKey: [QUERY_KEYS.GET_NEW_TASKS]
-            })
-            queryClient.invalidateQueries({
-                queryKey: [QUERY_KEYS.GET_ACCEPTED_TASKS]
-            })
-            queryClient.invalidateQueries({
-                queryKey: [QUERY_KEYS.GET_CREATED_TASKS]
-            })
-            queryClient.invalidateQueries({
-                queryKey: [QUERY_KEYS.GET_COMPLETED_TASKS]
+                queryKey: [QUERY_KEYS.GET_ALL_TASKS]
             })
         }
     })
@@ -131,16 +89,7 @@ export const useDeleteTask = () => {
                 queryKey: [QUERY_KEYS.GET_TASK_BY_ID, data?._id]
             })
             queryClient.invalidateQueries({
-                queryKey: [QUERY_KEYS.GET_NEW_TASKS]
-            })
-            queryClient.invalidateQueries({
-                queryKey: [QUERY_KEYS.GET_ACCEPTED_TASKS]
-            })
-            queryClient.invalidateQueries({
-                queryKey: [QUERY_KEYS.GET_CREATED_TASKS]
-            })
-            queryClient.invalidateQueries({
-                queryKey: [QUERY_KEYS.GET_COMPLETED_TASKS]
+                queryKey: [QUERY_KEYS.GET_ALL_TASKS]
             })
         }
     })

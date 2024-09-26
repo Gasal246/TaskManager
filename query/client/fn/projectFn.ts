@@ -170,3 +170,11 @@ export async function changeDocumentAccess(formData: FormData){
         console.log(error);
     }
 }
+
+export async function completeOrForwardProject(formData: FormData){
+    try {
+        
+    } catch (error) {
+        console.log(error);
+    }
+}

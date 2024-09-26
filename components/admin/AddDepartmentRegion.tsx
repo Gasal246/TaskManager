@@ -51,7 +51,7 @@ const AddDepartmentRegion = ({ trigger, depid }: { trigger: React.ReactNode, dep
                                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                                         <FormControl>
                                             <SelectTrigger>
-                                                <SelectValue placeholder="Select a staff as head of department" />
+                                                <SelectValue placeholder="Select a department region" />
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>

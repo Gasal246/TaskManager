@@ -27,7 +27,7 @@ const AdminLayout = async ({ children }: {
   }
 
   return (
-    <div className='w-full h-screen overflow-hidden flex relative'>
+    <div className='w-full h-[100dvh] overflow-hidden flex relative'>
       <div className="hidden lg:block w-2/12 h-full border-r border-slate-700">
         <StaffSidebar />
       </div>
@@ -35,8 +35,9 @@ const AdminLayout = async ({ children }: {
         <StaffTopbar />
         {children}
       </div>
-      <div className="block lg:hidden w-full absolute bottom-5 p-0">
+      <div className="block lg:hidden w-full absolute bottom-0 p-0">
         <MobileBottomBar />
+        {/* <div className="bg-black p-20 w-full"></div> */}
       </div>
     </div>
   )

@@ -20,6 +20,10 @@ import Image from 'next/image';
 import { formatDateTiny, multiFormatDateString } from '@/lib/utils';
 import { useGetAllProjectAnalytics } from '@/query/client/analyticsQueries';
 import { useFindUserById } from '@/query/client/userQueries';
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import RegionAndAreaFilter from '@/components/shared/RegionAndAreaFilter';
+import { useGetAllClients } from '@/query/client/clientQueries';
+import AddClientsDialog from '@/components/client/AddClientsDialog';
 
 
 type SearchProps = GetProps<typeof Input.Search>;
@@ -38,12 +42,25 @@ const ProjectsPage = () => {
   const { Search } = Input;
   const [searchValue, setSearchValue] = useState('');
   const { mutateAsync: searchProjects, isPending: searchingProjects } = useSearchProjects();
-  const [allProjects, setAllProjects] = useState<any[]>([])
+  const [allProjects, setAllProjects] = useState<any[]>([]);
+  const { data: clients, isLoading: loadingClients } = useGetAllClients(session?.user?.id);
+  const [selectedClients, setSelectedClients] = useState<any[]>([]);
+  const [region, setRegion] = useState('');
+  const [area, setArea] = useState('');
+
   const handleSearch: SearchProps['onSearch'] = async (value, _e, info) => {
     console.log(value)
     setSearchValue(value);
     const response = await searchProjects({ userid: session?.user?.id, searchTerm: value });
     setAllProjects(response);
+  }
+
+  const handleFilterClient = (clientid: string) => {
+    if(selectedClients?.includes(clientid)){
+      setSelectedClients(selectedClients.filter((id) => id != clientid));
+    }else{
+      setSelectedClients((prev) => [...prev, clientid]);
+    }
   }
 
   return (
@@ -68,31 +85,53 @@ const ProjectsPage = () => {
               token: { colorTextPlaceholder: 'gray' },
             }}
           ><Search placeholder="search projects" onSearch={handleSearch} className='w-full lg:w-1/2' /></ConfigProvider>
-          <AddProjectDialog trigger={<Button className='font-medium text-sm flex items-center gap-1 bg-neutral-300'>Add Project <FilePlus size={18} /></Button>} />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline">filter clients</Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56">
+              <DropdownMenuLabel>Filter Clients</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {clients?.length <= 0 && <AddClientsDialog currentUser={currentUser} />}
+              {
+                clients?.length > 0 &&
+                clients?.map((client: any) => (
+                  <DropdownMenuCheckboxItem key={client?._id} checked={selectedClients?.includes(client?._id)} onCheckedChange={() => handleFilterClient(client?._id)} >
+                    <div className="w-full p-1">
+                      <h3 className="text-xs font-medium text-slate-300">{client?.Name}</h3>
+                      <h3 className="text-xs text-slate-400">{client?.Email}</h3>
+                    </div>
+                  </DropdownMenuCheckboxItem>
+                ))
+              }
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <RegionAndAreaFilter currentUser={currentUser} setArea={setArea} setRegion={setRegion} placeholder='filter region ' />
+          <AddProjectDialog trigger={<Button className='font-medium lg:text-sm flex items-center gap-1 bg-cyan-600 mt-1'>Add Project <FilePlus size={18} /></Button>} />
         </div>
 
         {!searchValue ? <Tabs defaultValue="ongoing" className="w-full">
-          <TabsList className={`grid w-full ${currentUser?.Role == 'admin' ? 'grid-cols-5' : 'grid-cols-4'} gap-1 border border-slate-700`}>
-            {currentUser?.Role == 'admin' && <div className='px-2'><Badge count={newAnalytics?.unopenedProjects?.length} size='small' className='w-full text-slate-300'><TabsTrigger value="new" className='flex items-center gap-3 w-full border border-slate-950'>New Projects</TabsTrigger></Badge></div>}
+          <TabsList className={`grid w-full ${currentUser?.Role != 'staff' ? 'lg:grid-cols-5' : 'lg:grid-cols-4'} grid-cols-2 h-full gap-1 border border-slate-700`}>
+            {currentUser?.Role != 'staff' && <div className='px-2'><Badge count={newAnalytics?.unopenedProjects?.length} size='small' className='w-full text-slate-300'><TabsTrigger value="new" className='flex items-center gap-3 w-full border border-slate-950'>New Projects</TabsTrigger></Badge></div>}
             <div className='px-2'><Badge size='small' count={ongoingAnalytics?.unopenedProjects?.length} className='w-full text-slate-300'><TabsTrigger value="ongoing" className='flex items-center gap-3 w-full border border-slate-950'>Ongoing Projects</TabsTrigger></Badge></div>
             <div className='px-2'><Badge size='small' count={ownedAnalytics?.unopenedProjects?.length} className='w-full text-slate-300'><TabsTrigger value="owned" className='flex items-center gap-3 w-full border border-slate-950'>Owned Projects</TabsTrigger></Badge></div>
             <div className='px-2'><Badge size='small' count={deletedAnalytics?.unopenedProjects?.length} className='w-full text-slate-300'><TabsTrigger value="deleted" className='flex items-center gap-3 w-full border border-slate-950'>Deleted Projects</TabsTrigger></Badge></div>
             <div className='px-2'><Badge size='small' count={endedAnalytics?.unopenedProjects?.length} className='w-full text-slate-300'><TabsTrigger value="ended" className='flex items-center gap-3 w-full border border-slate-950'>Ended Projects</TabsTrigger></Badge></div>
           </TabsList>
           {currentUser?.Role == 'admin' && <TabsContent value="new">
-            <ProjectCards filter='new' />
+            <ProjectCards filter='new' selectedClients={selectedClients} />
           </TabsContent>}
           <TabsContent value="ongoing">
-            <ProjectCards filter='ongoing' />
+            <ProjectCards filter='ongoing' selectedClients={selectedClients} />
           </TabsContent>
           <TabsContent value="owned">
-            <ProjectCards filter='owned' />
+            <ProjectCards filter='owned' selectedClients={selectedClients} />
           </TabsContent>
           <TabsContent value="deleted">
-            <ProjectCards filter='deleted' />
+            <ProjectCards filter='deleted' selectedClients={selectedClients} />
           </TabsContent>
           <TabsContent value="ended">
-            <ProjectCards filter='ended' />
+            <ProjectCards filter='ended' selectedClients={selectedClients} />
           </TabsContent>
         </Tabs> :
           <Card className='border-slate-700'>

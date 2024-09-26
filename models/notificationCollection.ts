@@ -18,7 +18,7 @@ const NotificationsSchema: Schema = new Schema({
   Description: { type: String },
   SenderId: { type: Schema.Types.ObjectId, ref: "Users" },
   ReceiverId: { type: Schema.Types.ObjectId, ref: "Users" },
-  Type: { type: String, enum: ['role-change', 'project-queued' , 'password-changed', 'project-comment', 'project-deadline']},
+  Type: { type: String, enum: ['role-change', 'project-queued' , 'password-changed', 'project-comment', 'project-deadline', 'project-completion', 'project-forwarded']},
   Link: { type: String },
   IsOpened: { type: Boolean, default: false },
 },{ timestamps: true });

@@ -120,7 +120,7 @@ const AddTaskPage = () => {
                     <div className="flex flex-col bg-slate-950/50 p-3 rounded-lg mb-3">
                         <div className="flex justify-between items-center mb-2">
                             <h1 className="text-sm font-medium">Activities / ToDo</h1>
-                            <Button className="flex gap-1 rounded-full"><FilePlus2 size={16} />Add New</Button>
+                            <Button className="flex gap-1 rounded-full" type="button"><FilePlus2 size={16} />Add New</Button>
                         </div>
                         <div className="p-2 border rounded-lg border-slate-700 hover:bg-slate-800/70 select-none mb-2">
                             <div className="flex gap-2 items-center">

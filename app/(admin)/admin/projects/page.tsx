@@ -13,15 +13,18 @@ import { Button } from '@/components/ui/button';
 import AddProjectDialog from '@/components/shared/AddProjectDialog';
 import ProjectCards from '@/components/admin/ProjectCards';
 import ProjectCardsSkeleton from '@/components/skeletons/ProjectCardsSkeleton';
-import useDebounce from '@/hooks/useDebounce';
 import { useSearchProjects } from '@/query/client/projectQueries';
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import { formatDateTiny, multiFormatDateString } from '@/lib/utils';
 import { useGetAllProjectAnalytics } from '@/query/client/analyticsQueries';
 import { useFindUserById } from '@/query/client/userQueries';
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, } from "@/components/ui/dropdown-menu"
+import { DropdownMenuCheckboxItemProps } from '@radix-ui/react-dropdown-menu';
+import { useGetAllClients } from '@/query/client/clientQueries';
+import RegionAndAreaFilter from '@/components/shared/RegionAndAreaFilter';
 
-
+type Checked = DropdownMenuCheckboxItemProps["checked"]
 type SearchProps = GetProps<typeof Input.Search>;
 
 const ProjectsPage = () => {
@@ -31,12 +34,16 @@ const ProjectsPage = () => {
   const { data: deletedAnalytics, isLoading: loadingDeletedAnalytics }: any = useGetAllProjectAnalytics(session?.user?.id, 'deleted');
   const { data: ongoingAnalytics, isLoading: loadingOngoingAnalytics }: any = useGetAllProjectAnalytics(session?.user?.id, 'ongoing');
   const { data: ownedAnalytics, isLoading: loadingOwnedAnalytics }: any = useGetAllProjectAnalytics(session?.user?.id, 'owned');
-
   const { data: currentUser, isLoading: loadingUserData } = useFindUserById(session?.user?.id);
+  const { data: clients, isLoading: loadingClients } = useGetAllClients(session?.user?.id)
+  const [selectedClients, setSelectedClients] = useState<any[]>([])
+  const [selectedRegion, setSelectedRegion] = useState<any[]>([]);
 
   const router = useRouter();
   const { Search } = Input;
   const [searchValue, setSearchValue] = useState('');
+  const [region, setRegion] = useState('');
+  const [area, setArea] = useState('')
   const { mutateAsync: searchProjects, isPending: searchingProjects } = useSearchProjects();
   const [allProjects, setAllProjects] = useState<any[]>([])
   const handleSearch: SearchProps['onSearch'] = async (value, _e, info) => {
@@ -46,8 +53,16 @@ const ProjectsPage = () => {
     setAllProjects(response);
   }
 
+  const handleFilterClient = (clientid: string) => {
+    if(selectedClients?.includes(clientid)){
+      setSelectedClients(selectedClients.filter((id) => id != clientid));
+    }else{
+      setSelectedClients((prev) => [...prev, clientid]);
+    }
+  }
+
   return (
-    <div className='p-4'>
+    <div className='p-4 overflow-y-scroll pb-20'>
       <div className="flex justify-between bg-slate-950/50 p-3 rounded-lg items-center">
         <h1 className='font-bold'>Project Management</h1>
 
@@ -68,6 +83,27 @@ const ProjectsPage = () => {
               token: { colorTextPlaceholder: 'gray' },
             }}
           ><Search placeholder="search projects" onSearch={handleSearch} className='w-full lg:w-1/2' /></ConfigProvider>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline">filter clients</Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56">
+              <DropdownMenuLabel>Filter Clients</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {
+                clients?.length > 0 &&
+                clients?.map((client: any) => (
+                  <DropdownMenuCheckboxItem key={client?._id} checked={selectedClients?.includes(client?._id)} onCheckedChange={() => handleFilterClient(client?._id)} >
+                    <div className="w-full p-1">
+                      <h3 className="text-xs font-medium text-slate-300">{client?.Name}</h3>
+                      <h3 className="text-xs text-slate-400">{client?.Email}</h3>
+                    </div>
+                  </DropdownMenuCheckboxItem>
+                ))
+              }
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <RegionAndAreaFilter currentUser={currentUser} setArea={setArea} setRegion={setRegion} placeholder='filter region ' />
           <AddProjectDialog trigger={<Button className='font-medium text-sm flex items-center gap-1 bg-neutral-300'>Add Project <FilePlus size={18} /></Button>} />
         </div>
 
@@ -80,19 +116,19 @@ const ProjectsPage = () => {
             <div className='px-2'><Badge size='small' count={endedAnalytics?.unopenedProjects?.length} className='w-full text-slate-300'><TabsTrigger value="ended" className='flex items-center gap-3 w-full border border-slate-950'>Ended Projects</TabsTrigger></Badge></div>
           </TabsList>
           {currentUser?.Role == 'admin' && <TabsContent value="new">
-            <ProjectCards filter='new' currentUser={currentUser} />
+            <ProjectCards filter='new' currentUser={currentUser} selectedClients={selectedClients} />
           </TabsContent>}
           <TabsContent value="ongoing" >
-            <ProjectCards filter='ongoing' currentUser={currentUser}/>
+            <ProjectCards filter='ongoing' currentUser={currentUser} selectedClients={selectedClients} />
           </TabsContent>
           <TabsContent value="owned">
-            <ProjectCards filter='owned' currentUser={currentUser}/>
+            <ProjectCards filter='owned' currentUser={currentUser} selectedClients={selectedClients} />
           </TabsContent>
           <TabsContent value="deleted">
-            <ProjectCards filter='deleted' currentUser={currentUser}/>
+            <ProjectCards filter='deleted' currentUser={currentUser} selectedClients={selectedClients} />
           </TabsContent>
           <TabsContent value="ended">
-            <ProjectCards filter='ended' currentUser={currentUser}/>
+            <ProjectCards filter='ended' currentUser={currentUser} selectedClients={selectedClients} />
           </TabsContent>
         </Tabs> :
           <Card className='border-slate-700'>

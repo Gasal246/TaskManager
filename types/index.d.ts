@@ -18,7 +18,7 @@ declare type AdminDataFilters = 'today' | 'month' | 'all' | 'days';
 
 declare type ProjectGetFilters = 'all' | 'new' | 'ongoing' | 'deleted' | 'owned' | 'ended';
 
-declare type NotificationTypes = 'role-change' | 'project-queued' | 'password-changed' | 'project-comment' | 'project-deadline' | 'project-approval';
+declare type NotificationTypes = 'role-change' | 'project-queued' | 'password-changed' | 'project-comment' | 'project-deadline' | 'project-approval' | 'project-completion' | 'project-forwarded';
 
 declare type AdminWithinDaysType = {
     from: string;
@@ -42,5 +42,7 @@ declare type StaffData = {
 }
 
 declare type StaffStatus = 'active' | 'blocked' | 'unverified'
+
+declare type TaskTypes = 'created' | 'new' | 'accepted' | 'completed'
 
 declare module 'formidable-serverless';

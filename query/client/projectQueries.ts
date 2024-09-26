@@ -1,6 +1,6 @@
 import { QUERY_KEYS } from "../queryKeys";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { addNewProject, addProjectComment, addProjectDoc, addProjectFlow, approveProject, changeDocumentAccess, changeProjectDeadline, deleteProjectComment, deleteProjectDoc, deleteProjectFlow, getAllProjectsAdmin, getAllUserProjects, getProjectById, getProjectComments, getProjectFlows, projectOnView, searchProjects, updateProjectDetails } from "./fn/projectFn";
+import { addNewProject, addProjectComment, addProjectDoc, addProjectFlow, approveProject, changeDocumentAccess, changeProjectDeadline, completeOrForwardProject, deleteProjectComment, deleteProjectDoc, deleteProjectFlow, getAllProjectsAdmin, getAllUserProjects, getProjectById, getProjectComments, getProjectFlows, projectOnView, searchProjects, updateProjectDetails } from "./fn/projectFn";
 
 export const useGetAllProjectsAdmin = (adminid: string, filter: ProjectGetFilters) => {
     return useQuery({
@@ -221,6 +221,21 @@ export const useDocumentChangeAccess = () => {
             })
             queryClient.invalidateQueries({
                 queryKey: [QUERY_KEYS.GET_PROJECT_DOCS, data?._id]
+            })
+        }
+    })
+}
+
+export const useCompleteOrForwardProject = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async (formData: FormData) => completeOrForwardProject(formData),
+        onSuccess: (data: any) => {
+            queryClient.invalidateQueries({
+                queryKey: [QUERY_KEYS.GET_PROJECT_BY_ID, data?._id]
+            })
+            queryClient.invalidateQueries({
+                queryKey: [QUERY_KEYS.GET_ALL_PROJECTS, data?.AdminId]
             })
         }
     })

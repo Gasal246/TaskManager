@@ -21,7 +21,8 @@ export interface IProjects extends Document {
     }[];
     Flows: ObjectId[] | [];
     IsApproved: Boolean | null;
-    OpenedBy: ObjectId | null;
+    OpenedBy: ObjectId[] | null;
+    ClientId: ObjectId | null;
     createdAt: Date | null;
     updatedAt: Date | null;
     AccessTo: ObjectId[] | [];
@@ -49,7 +50,8 @@ const ProjectsSchema: Schema = new Schema({
     IsApproved: { type: Boolean },
     OpenedBy: [{ type: Schema.Types.ObjectId, ref: "Users" }],
     AccessTo: [{ type: Schema.Types.ObjectId, ref: "Users" }],
-    IsCompleted: { type: Boolean }
+    IsCompleted: { type: Boolean },
+    ClientId: { type: Schema.Types.ObjectId, ref: "Users" },
 }, { timestamps: true });
 
 const Projects = mongoose?.models?.Projects || mongoose.model<IProjects>('Projects', ProjectsSchema);

@@ -30,10 +30,7 @@ export enum QUERY_KEYS {
     // user keys
     GET_USER_BY_ID = "getUserByUserid",
     GET_TASK_BY_ID = "getTaskByTaskid",
-    GET_NEW_TASKS = "getNewTasksByUserId",
-    GET_ACCEPTED_TASKS = "getAcceptedTasks",
-    GET_CREATED_TASKS = "getForwardedTasks",
-    GET_COMPLETED_TASKS = "getCompletedTasks",
+    GET_ALL_TASKS = "getAllTasks",
     GET_COMMENTS_BY_TASKID = "getCommentByTaskId",
     GET_CHOOSE_STAFFS = "getChooseStaffs",
     GET_ALL_NOTIFICATIONS = "getNotificationsByUserId",
@@ -48,5 +45,10 @@ export enum QUERY_KEYS {
     GET_PROJECT_COMMENTS = "getProjectCommentsByProjectId",
 
     // Analytics
-    GET_PROJECTS_ANALYTICS = "getProjectsAnalytics"
+    GET_PROJECTS_ANALYTICS = "getProjectsAnalytics",
+    GET_TASKS_ANALYTICS = "getAllTaskAnalytics",
+
+    // Client keys
+    GET_ALL_CLIENTS = "getAllClientsByUserId",
+    GET_CLIENT_BY_ID = "getClientByUserId",
 }

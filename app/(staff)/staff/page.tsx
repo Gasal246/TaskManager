@@ -37,7 +37,7 @@ const StaffHome = () => {
       </div>
       <div className="bg-slate-950/50 p-3 rounded-lg flex gap-1 justify-between mb-3 lg:flex-nowrap flex-wrap">
         <div onClick={() => router.push(`/staff/tasks`)} className="bg-slate-950/50 p-2 px-3 rounded-lg w-full lg:w-1/2 border hover:border-slate-700 border-slate-900 select-none cursor-pointer">
-          <h1 className='text-sm font-medium mb-1'>Your Tasks</h1>
+          <h1 className='text-sm font-medium mb-1'>Tasks</h1>
           <div className="flex gap-2">
             <h1 className='lg:w-32 text-xs font-semibold p-1 px-3 border border-slate-500 rounded-lg'>New: 5</h1>
             <h1 className='lg:w-32 text-xs font-semibold p-1 px-3 border border-slate-500 rounded-lg'>Ongoing: 5</h1>
@@ -45,7 +45,7 @@ const StaffHome = () => {
           </div>
         </div>
         <div onClick={() => router.push(`/staff/projects`)} className="bg-slate-950/50 p-2 px-3 rounded-lg w-full lg:w-1/2 border hover:border-slate-700 border-slate-900 select-none cursor-pointer">
-          <h1 className='text-sm font-medium mb-1'>Your Projects</h1>
+          <h1 className='text-sm font-medium mb-1'>Projects</h1>
           <div className="flex gap-2">
             <h1 className='lg:w-32 text-xs font-semibold p-1 px-3 border border-slate-500 rounded-lg'>New: 5</h1>
             <h1 className='lg:w-32 text-xs font-semibold p-1 px-3 border border-slate-500 rounded-lg'>Ongoing: 5</h1>

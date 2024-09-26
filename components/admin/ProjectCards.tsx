@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client"
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
 import { motion } from 'framer-motion'
 import { Avatar, Badge, Tooltip } from 'antd'
@@ -14,7 +14,7 @@ import ProjectCardsSkeleton from '../skeletons/ProjectCardsSkeleton'
 import Image from 'next/image'
 import { formatDateTiny, multiFormatDateString } from '@/lib/utils'
 
-const ProjectCard = ({ project, userRole }: { project: any, userRole: string }) => {
+export const ProjectCard = ({ project, userRole }: { project: any, userRole: string }) => {
     const router = useRouter();
     
     return (
@@ -43,36 +43,67 @@ const ProjectCard = ({ project, userRole }: { project: any, userRole: string }) 
                 <h2 className={`text-xs ${project?.Priority == 'high' ? 'text-red-400' : (project?.Priority == 'average' ? 'text-orange-400' : 'text-slate-400')} flex items-center gap-1 font-medium capitalize`}><Circle size={10} fill="" strokeWidth={5} /><span className='uppercase'>{project?.Priority}</span> priority</h2>
                 <h2 className={`text-xs ${project?.IsApproved ? 'text-green-400' : 'text-orange-400'} flex items-center gap-1 font-medium`}><Circle size={10} fill="" strokeWidth={5} />{project?.IsApproved ? 'Approved Project' : 'Waiting Approval'}</h2>
             </div>
-            <div className='flex gap-1 items-center'>
+            {project?.Progress && <div className='flex gap-1 items-center'>
                 <Progress value={project?.Progress} /> <span className='text-xs'>{project?.Progress}%</span>
-            </div>
-            {userRole == 'admin' && !project?.IsApproved && <div className='mt-1'>
+            </div>}
+            {project?.Progress && userRole == 'admin' && !project?.IsApproved && <div className='mt-1'>
                 <motion.h1 whileHover={{ scale: 1.02 }} className='w-full bg-green-400 rounded-lg p-2 text-black text-center font-semibold hover:shadow-orange-300 shadow-sm'>Approve Project</motion.h1>
             </div>}
         </motion.div>
     )
 }
 
-const ProjectCards = ({ filter, title, currentUser }: { filter: ProjectGetFilters, title?: string, currentUser?: any }) => {
+const ProjectCards = ({ filter, title, currentUser, selectedClients }: { filter: ProjectGetFilters, title?: string, currentUser?: any, selectedClients?: string[] }) => {
     const { data: session }: any = useSession();
     const { data: allProjects, isLoading: loadingProjects } = useGetUserProjects(session?.user?.id, filter);
+
+    useEffect(() => {
+        if(allProjects){
+            console.log(filter + "All Projects", allProjects)
+        }else{
+            console.log(filter + "all projects loading or not found yet")
+        }
+    }, [allProjects])
+
+    // Function to filter projects by selected clients
+    const filterProjectsByClients = (projects: any[]) => {
+        if (selectedClients?.length === 0) return projects; // If no clients are selected, return all projects
+        return projects?.filter((project) => selectedClients?.includes(project?.ClientId));
+    };
+
+    // Apply the filtering based on selected clients
+    const filteredProjects = filterProjectsByClients(allProjects || []);
+
     return (
         <Card className='border-slate-700'>
-            <CardHeader className='p-3 px-4 capitalize'><CardTitle>{title || filter + " projects"}</CardTitle></CardHeader>
+            <CardHeader className='p-3 px-4 capitalize'>
+                <CardTitle>{title || filter + " projects"}</CardTitle>
+            </CardHeader>
             <CardContent className="p-3 w-full flex flex-wrap">
                 {loadingProjects && <ProjectCardsSkeleton />}
-                {allProjects?.map((project: any) => (
+                {filteredProjects?.map((project: any) => (
                     <div className="w-full lg:w-4/12 p-1" key={project?._id}>
-                        <Badge size='small' dot={!project?.OpenedBy?.includes(session?.user?.id)} className='w-full text-slate-300'><ProjectCard project={project} userRole={currentUser?.Role} /></Badge>
+                        <Badge size='small' dot={!project?.OpenedBy?.includes(session?.user?.id)} className='w-full text-slate-300'>
+                            <ProjectCard project={project} userRole={currentUser?.Role} />
+                        </Badge>
                     </div>
                 ))}
-                {!allProjects ? <h1 className='text-sm font-medium flex gap-1 items-center text-red-300'><Frown /> Cannot find any results for {filter}</h1> :
-                    (allProjects?.length <= 0 && <Tooltip title={`No Data for ${filter} projects.`} ><motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} animate={{ scale: 1.2 }} className='w-full flex justify-center items-center py-10'>
-                        <Image src={`/icons/noresults.png`} alt='noresults' width={200} height={200} className='opacity-70' />
-                    </motion.div></Tooltip>)}
+                {!filteredProjects ? (
+                    <h1 className='text-sm font-medium flex gap-1 items-center text-red-300'>
+                        <Frown /> Cannot find any results for {filter}
+                    </h1>
+                ) : (
+                    filteredProjects?.length <= 0 && (
+                        <Tooltip title={`No Data for ${filter} projects.`}>
+                            <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} animate={{ scale: 1.2 }} className='w-full flex justify-center items-center py-10'>
+                                <Image src={`/icons/noresults.png`} alt='noresults' width={200} height={200} className='opacity-70' />
+                            </motion.div>
+                        </Tooltip>
+                    )
+                )}
             </CardContent>
         </Card>
-    )
-}
+    );
+};
 
 export default ProjectCards
