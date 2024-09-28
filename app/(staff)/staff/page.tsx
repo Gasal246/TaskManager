@@ -1,12 +1,13 @@
 "use client"
 import { useFindUserById } from '@/query/client/userQueries';
-import { BellElectric, Contact, Globe2, LandPlot } from 'lucide-react';
+import { AreaChart, BellElectric, Contact, Globe2, LandPlot } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import React from 'react'
 import { useRouter } from 'next/navigation';
 import UserDailyActivity from '@/components/charts/UserDailyActivity';
 import UserMonthlyActivity from '@/components/charts/UserMonthlyActivity';
 import TodoBox from '@/components/staff/TodoBox';
+import ProjectsCompletedAndPending from '@/components/charts/ProjectsCompletedAndPending';
 
 const StaffHome = () => {
   const router = useRouter();
@@ -53,10 +54,11 @@ const StaffHome = () => {
           </div>
         </div>
       </div>
-      <div className='flex mt-3 flex-wrap bg-slate-950/50 p-3 rounded-lg items-center justify-center gap-3'>
-        <TodoBox />
-        <UserMonthlyActivity />
-        <UserDailyActivity />
+      <div className='w-full mt-3 bg-slate-950/50 p-3 rounded-lg'>
+        <h1 className='text-sm font-medium gap-1 items-center flex text-cyan-500 mb-2'><AreaChart size={18} /> Analytics</h1>
+        <div className="grid lg:grid-cols-2 grid-cols-1 gap-2 w-full">
+          <ProjectsCompletedAndPending currentUser={userData} />
+        </div>
       </div>
     </div>
   )

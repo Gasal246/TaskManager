@@ -42,7 +42,7 @@ const TasksSchema: Schema = new Schema({
   AssignedDepartment: { 
     DepId: { type: Schema.Types.ObjectId, ref: "Departments" },
     Region: { type: Schema.Types.ObjectId, ref: "Regions" },
-    Area: { types: Schema.Types.ObjectId, ref: "Areas" }
+    Area: { type: Schema.Types.ObjectId, ref: "Areas" },
   },
   AssignedUser: { type: Schema.Types.ObjectId, ref: "Users" },
   ProjectId: { type: Schema.Types.ObjectId },

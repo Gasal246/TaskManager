@@ -7,7 +7,7 @@ connectDB();
 export async function GET(req: NextRequest, { params }:{ params: { userid: string }}){
     try {
         const searchParams: any = req.nextUrl.searchParams;
-        const filter: TaskTypes = searchParams.get('filter');
+        const filter: TaskTypes = await searchParams.get('filter');
 
         let query = {}
         switch(filter){
