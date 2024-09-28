@@ -3,11 +3,11 @@ import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { authOptions } from "../../auth/[...nextauth]/route";
 import Projects from "@/models/projectCollection";
-import ProjectComments from "@/models/projectComments";
 import { sendNotification } from "../../helpers/notification-helper";
 import Users from "@/models/userCollection";
 
 import { getPusherInstance } from '@/lib/pusher/server';
+import ProjectComments from "@/models/projectComments";
 const pusherServer = getPusherInstance();
 
 connectDB();
