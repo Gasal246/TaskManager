@@ -13,7 +13,7 @@ export async function POST(req: NextRequest){
         
         const { projectid, commentid } = await req.json();
         const updatedProject = await Projects.findByIdAndUpdate(projectid, { $pull: { Comments: { _id: commentid }}}, { new: true });
-        const removedFlow = await ProjectComments.findByIdAndDelete(commentid);
+        const removedComment = await ProjectComments.findByIdAndDelete(commentid);
         return Response.json(updatedProject);
     } catch (error) {
         console.log(error);
